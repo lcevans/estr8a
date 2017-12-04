@@ -51,13 +51,38 @@ def explain(instruction):
             return f'Set the value of V{rega} to V{rega} XOR V{regb}'
         if flag == '4':
             return f'Set the value of V{rega} to V{rega} + V{regb} carry goes to Vf'
-        if flag == '4':
+        if flag == '5':
             return f'Set the value of V{rega} to V{rega} - V{regb} and Vf is set to V{rega} > V{regb}'
+        if flag == '6':
+            return f'Shift V{rega} by 1 to the right, the least significant bit is written in Vf'
+        if flag == '7':
+            return f'Set the value of V{rega} to V{regb} - V{rega} and Vf is set to V{regb} > V{rega}'
+        if flag == 'e':
+            return f'Shift V{rega} by 1 to the left, the most significant bit is written in Vf'
+    if instruction.startswith('9'):
+        rega = instruction[1]
+        regb = instruction[2]
+        return f'Skip next instruction if V{rega} != V{regb}'
+    if instruction.startswith('a'):
+        address = instruction[1:]
+        return f'Set the register I to the address {address}'
+    if instruction.startswith('b'):
+        address = instruction[1:]
+        return f'Set the program counter to the address {address} + V0'
+    if instruction.startswith('c'):
+        register = instruction[1]
+        value = instruction[2:]
+        return f'Set the register V{register} to a random byte AND {value}'
+    if instruction.startswith('d'):
+        rega = instruction[1]
+        regb = instruction[2]
+        n = instruction[3]
+        return f'Draw a sprite of {n} bytes from the address stored at I to (V{rega}, V{regb}), Vf is set to whether or not a pixel was erased.'
     return ''
 
 
 if __name__ == '__main__':
-    filename = 'c8games/GUESS'
+    filename = 'games/GUESS'
     print(f'reading the file {filename}')
     with open(filename, 'rb', buffering=0) as program:
         addr = 512
