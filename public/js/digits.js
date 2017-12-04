@@ -3,8 +3,9 @@
 
 var stringToChipFont = (string) => {
     // Because of how the digits are defined in the file, they will have leading and trailing
-    // new lines that we need to trim here.
-    var rows = string.trim().split("\n");
+    // new lines that we need to trim here. We can't use the actual trim function here because
+    // it will also crop leading spaces, which messes up "1" for instance.
+    var rows = string.substring(1, string.length - 1).split("\n");
     var bytes = new Uint8Array(rows.length);
     for (var row = 0; row < rows.length; row++) {
         value = 0;
