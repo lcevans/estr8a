@@ -51,8 +51,11 @@ class Chip8Emulator {
 
         // Update timers
 
-        // This would check to update which keys are being pressed by the user.
-        // this.setKeys();
+        // Code for testing the keyboard mapping. This will log 0-F
+        // based on which keys are currently pressed.
+        for (var i = 0; i < 16; i++) {
+            if (isChipKeyDown(i)) console.log(i.toString(16));
+        }
     }
 
     renderLoop() {
