@@ -2,9 +2,11 @@
 // http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#font
 
 var stringToChipFont = (string) => {
+    // Because of how the digits are defined in the file, they will have leading and trailing
+    // new lines that we need to trim here.
     var rows = string.trim().split("\n");
     var bytes = new Uint8Array(rows.length);
-    for (var row =0; row < rows.length; row++) {
+    for (var row = 0; row < rows.length; row++) {
         value = 0;
         for (var i = 0; i < 4; i++) {
             value = (value << 1);
