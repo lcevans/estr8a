@@ -71,7 +71,7 @@ const instructions = {
         [/(.)(..)/, (match) => ({inst: 'RND', params: [`V${match[1]}`, match[2]]})]
     ],
     'D': [
-        [/(.)(.)(.)/, (match) => ({inst: 'DRW', Vx: match[0], Vy: match[1], nibble: match[2]})]
+        [/(.)(.)(.)/, (match) => ({inst: 'DRW', Vx: match[1], Vy: match[2], nibble: match[3]})]
     ],
     'E': [
         [/(.)9E/, (match) => ({inst: 'SKP', params: [`V${match[1]}`]})],
