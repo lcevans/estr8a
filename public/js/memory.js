@@ -1,8 +1,5 @@
-// Memory is just an array of unsigned bytes.
-var memory = new Uint8Array(4096);
-
 // Convert a row (16 bytes of memory) to text for display in memory dump.
-var memoryLineToText = (row) => {
+var memoryLineToText = (memory, row) => {
     var start = row * 16, end = start + 16;
     var addressText = (start).toString(16);
     while (addressText.length < 3) addressText = `0${addressText}`;
@@ -18,11 +15,22 @@ var memoryLineToText = (row) => {
 }
 
 // Render initial state of memory to the screen.
-var memoryContainer = document.getElementsByClassName("js-memory")[0];
-for (var row = 0; row < memory.length / 16; row++) {
-    var line = document.createElement("div");
-    var text = document.createTextNode(memoryLineToText(row));
-    line.append(text);
-    memoryContainer.append(line);
-}
+var initializeMemoryDisplay = () => {
 
+    // This code was just a test for copying the chip font set into the start of
+    // memory, if we wanted to do this for some reason.
+    /*var chipFontOffset = 0;
+    for (var i = 0; i < digits.length; i++) {
+        for (var j = 0; j < digits[i].length; j++) {
+            emulator.memory[chipFontOffset + i * digits[i].length + j] = digits[i][j];
+        }
+    }*/
+
+    var memoryContainer = document.getElementsByClassName("js-memory")[0];
+    for (var row = 0; row < emulator.memory.length / 16; row++) {
+        var line = document.createElement("div");
+        var text = document.createTextNode(memoryLineToText(emulator.memory, row));
+        line.append(text);
+        memoryContainer.append(line);
+    }
+};
