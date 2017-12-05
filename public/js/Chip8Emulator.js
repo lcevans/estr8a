@@ -3,12 +3,14 @@ class Chip8Emulator {
 
     constructor(screenWidth, screenHeight) {
         this.memory = new Uint8Array(4096);
+        this.registers = new Uint8Array(17);
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         // Each pixel only needs 1 bit, so we divide by 8 here to get the length we need.
         this.screen = new Uint8Array(Math.ceil(screenWidth * screenHeight / 8));
         this.drawFlag = false;
         this.mainLoopId = null;
+        this.programCounter = 0x200;
 
         // This is dummy code to test that drawing the screen works roughly how we are expecting:
         for (var i = 0; i < 16; i++) {
@@ -16,7 +18,6 @@ class Chip8Emulator {
         }
         this.drawFlag = true;
     }
-
     loadGame(gameName) {
         // We could add the games somewhere under `/public` and load them with fetch here.
         return Promise.resolve([0, 0, 0, 0, 0,]).then(gameData => {
@@ -44,11 +45,24 @@ class Chip8Emulator {
         window.requestAnimationFrame(() => this.renderLoop());
     }
 
-    emulationLoop() {
-        // Fetch Opcode
-        // Decode Opcode
-        // Execute Opcode
+    moveToNextInstruction() {
+        this.programCounter += 2;
+    }
 
+    fetchOpcode() {
+        let opcode = this.memory[this.programCounter] << 8 | this.memory[this.programCounter + 1];
+        this.moveToNextInstruction();
+        return opcode;
+    }
+
+    executeOpcode(opcode) {
+        executeInstruction(this, opcode);
+    }
+
+    emulationLoop() {
+        let opcode = fetchOpcode();
+        // Execute Opcode
+        executeOpcode(opcode);
         // Update timers
 
         // Code for testing the keyboard mapping. This will log 0-F
