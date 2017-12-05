@@ -26,6 +26,7 @@ var initializeMemoryDisplay = () => {
         }
     }*/
 
+    // TODO: Display registers as well
     var memoryContainer = document.getElementsByClassName("js-memory")[0];
     for (var row = 0; row < emulator.memory.length / 16; row++) {
         var line = document.createElement("div");
