@@ -56,7 +56,6 @@ class Chip8Emulator {
     }
 
     emulationLoop() {
-        updateMemoryDisplay(this.machine);
         this.machine.tick()
     }
 
