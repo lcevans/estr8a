@@ -11,10 +11,13 @@ body {
 }
 
 /* Memory display */
-.memory {
+.memoryContainer {
     display: inline-block;
-    height: 400px;
     vertical-align: top;
+}
+.memory {
+    display: none;
+    height: 400px;
     margin-right: 20px;
     padding: 5px;
     border: 1px solid black;

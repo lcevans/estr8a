@@ -27,11 +27,14 @@ var initializeMemoryDisplay = () => {
     }*/
 
     // TODO: Display registers as well
-    var memoryContainer = document.getElementsByClassName("js-memory")[0];
+    var memoryDiv = document.getElementsByClassName("js-memory")[0];
     for (var row = 0; row < emulator.memory.length / 16; row++) {
         var line = document.createElement("div");
         var text = document.createTextNode(memoryLineToText(emulator.memory, row));
         line.append(text);
-        memoryContainer.append(line);
+        memoryDiv.append(line);
+    }
+    document.getElementsByClassName("js-toggleMemory")[0].onclick = () => {
+        memoryDiv.style.display = (memoryDiv.style.display == "inline-block") ? "none" : "inline-block";
     }
 };
