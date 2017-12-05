@@ -49,7 +49,6 @@ class Chip8Emulator {
                     // Write the loaded game to memory starting at 0x200.
                     this.memory[0x200 + i] = gameData[i];
                 }
-            initializeMemoryDisplay();
             emulator.startEmulator();
         });
     }
@@ -118,6 +117,7 @@ class Chip8Emulator {
         }
         // This will update the display of which keys are being pressed.
         updateKeyboard();
+        updateMemoryDisplay(emulator.memory);
         // Assume that the emulator is still running as long `this.mainLoopId` is set.
         if (this.mainLoopId) {
             window.requestAnimationFrame(() => this.renderLoop());

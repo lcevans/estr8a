@@ -11,6 +11,8 @@ var main = () => {
     // This should create a canvas element and whatever methods we need to
     // draw the screen.
     initializeCanvas(emulator.screenWidth, emulator.screenHeight);
+    drawEmulatorToCanvas(emulator);
+    initializeMemoryDisplay(emulator.memory);
 
     // Setup listeners for the keys that map to the 0-F chip 8 keys.
     initializeKeyboard();
