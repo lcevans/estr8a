@@ -11,10 +11,10 @@ class Chip8Machine {
         this.screen = new Uint8Array(screenSize);
     }
 
-    loadData(data) {
+    loadGame(data) {
         for (var i = 0; i < data.length; i++) {
             // Write the loaded game to memory starting at 0x200.
-            this.memory[i] = data[i];
+            this.memory[512+i] = data[i];
         }
     }
 
@@ -253,4 +253,9 @@ class Chip8Machine {
             break;
         }
     }
+}
+
+var makeMachine = function(screenSize) {
+    var machine = new Chip8Machine(screenSize);
+    return machine;
 }

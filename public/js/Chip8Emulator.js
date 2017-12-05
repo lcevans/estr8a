@@ -1,12 +1,12 @@
 var TICK_MS = 16; // ms between ticks
 
 class Chip8Emulator {
-    constructor(screenWidth, screenHeight, Machine) {
+    constructor(screenWidth, screenHeight, MakeMachine) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         // Each pixel only needs 1 bit, so we divide by 8 here to get the length we need.
         let screenSize = (Math.ceil(screenWidth * screenHeight / 8));
-        this.machine = Machine(screenSize);
+        this.machine = MakeMachine(screenSize);
         this.drawFlag = false;
         this.mainLoopId = null;
 
@@ -33,10 +33,7 @@ class Chip8Emulator {
             return gd;
         }).then(gameData => {
             console.log("Loading", gameData.length, "bytes!");
-            for (var i = 0; i < gameData.length; i++) {
-                // Write the loaded game to memory starting at 0x200.
-                this.memory[0x200 + i] = gameData[i];
-            }
+            this.machine.loadGame(gameData);
             initializeMemoryDisplay();
             this.startEmulator();
         });
@@ -60,16 +57,7 @@ class Chip8Emulator {
     }
 
     emulationLoop() {
-        machine.tick()
-        // Fetch Opcode
-        const op = this.fetchOpcode();
-        const inst = this.executeOpcode(op);
-
-        // Decode Opcode
-        // TODO: Create a mapping from most significant word to method from the selection below
-        // Execute Opcode
-        // TODO: Call appropriate method below with the instruction as an argument.
-
+        this.machine.tick()
     }
 
     renderLoop() {
