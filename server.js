@@ -12,9 +12,12 @@ app.get('/api/games/', (req, res) => {
     fs.readdir(GAMES_DIR, (err, files) => {
         if (err) {
             res.status(500);
-            res.send({error: err})
+            res.send({error: err});
         } else {
-            res.send({data: files})
+            res.send({data: files.map(file => ({
+                name: file,
+                url: `/api/games/${file}`,
+            }))});
         }
     });
 });
