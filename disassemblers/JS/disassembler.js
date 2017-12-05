@@ -25,7 +25,6 @@ document.onreadystatechange = function() {
             console.log(game, game.byteLength)
             view = new DataView(game);
             for(i=0; i < game.byteLength; i = i + 2) {
-                console.log(i)
                 b0 = view.getUint8(i);
                 b1 = view.getUint8(i+1);
                 hex_str = (b0 >> 4).toString(16) + (b0 & 0xF).toString(16) + (b1 >> 4).toString(16) + (b1 & 0xF).toString(16);

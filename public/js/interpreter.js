@@ -56,7 +56,7 @@ const instructions = {
         [/(.)(..)/i, (match) => ({inst: 'ADD', params: [`V${match[1]}`, match[2]]})]
     ],
     '8': [
-        [/(.)(.)([0-7E])/i, (match) => ({inst: inst8[match[3]], params: [`V${match[1]}`, `V${match[2]}`]})]
+        [/(.)(.)([0-7E])/i, (match) => ({inst: inst8[match[3].toUpperCase()], params: [`V${match[1]}`, `V${match[2]}`]})]
     ],
     '9': [
         [/(.)(.)0/i, (match) => ({inst: 'SNE', params: [`V${match[1]}`, `V${match[2]}`]})]
