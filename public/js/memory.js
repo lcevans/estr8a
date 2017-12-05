@@ -32,11 +32,6 @@ var initializeMemoryDisplay = (machine) => {
     displayedMemory = [...memory];
     document.getElementsByClassName('js-toggleMemory')[0].onclick = () => {
         memoryDiv.style.display = (memoryDiv.style.display == 'inline-block') ? 'none' : 'inline-block';
-        // If the emulator is paused and the memory div was just opened, we need to manually update
-        // since it doesn't update while it is closed.
-        if (!emulator.shouldPlay && memoryDiv.style.display !== 'none') {
-            updateMemoryDisplay(emulator.machine);
-        }
     }
 };
 

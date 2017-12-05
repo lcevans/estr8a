@@ -32,8 +32,7 @@ var initializeTitleBar = function () {
         updatePlayButtons();
     };
     document.getElementById('step-button').onclick = function() {
-        // This runs a single step and updates the display.
-        emulator.step();
+        emulator.emulationLoop();
     };
     updatePlayButtons();
 };

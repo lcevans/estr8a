@@ -18,6 +18,7 @@ class Chip8Emulator {
             this.drawChipCharacterToScreen(digits[i], i % 8, Math.floor(i / 8) * 7);
         }
         this.drawFlag = true;
+        window.requestAnimationFrame(() => this.renderLoop());
     }
 
     loadGame(gameName) {
@@ -58,7 +59,6 @@ class Chip8Emulator {
             clearInterval(this.mainLoopId);
         }
         this.mainLoopId = setInterval(() => this.emulationLoop(), TICK_MS);
-        window.requestAnimationFrame(() => this.renderLoop());
     }
 
     pauseEmulator() {
@@ -69,13 +69,6 @@ class Chip8Emulator {
             // the emulator is currently playing.
             this.mainLoopId = null;
         }
-    }
-
-    step() {
-        this.machine.tick();
-        // The render loop doesn't run while the emulator is paused, so we need
-        // to manually call it every time we step.
-        this.renderLoop();
     }
 
     emulationLoop() {
@@ -91,9 +84,7 @@ class Chip8Emulator {
         updateKeyboard();
         updateMemoryDisplay(this.machine);
         // Assume that the emulator is still running as long `this.mainLoopId` is set.
-        if (this.mainLoopId) {
-            window.requestAnimationFrame(() => this.renderLoop());
-        }
+        window.requestAnimationFrame(() => this.renderLoop());
     }
 
     drawGraphics() {
