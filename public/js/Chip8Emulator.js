@@ -167,18 +167,18 @@ class Chip8Emulator {
     // Return from a subroutine.              //
     ////////////////////////////////////////////
     SYS(inst) {
-        var [x,y,z] = this.extractRegs(inst);
+        var [x,y] = this.extractReg(inst);
         // Ignore all syscalls other than return and cls
-        if (x>0 || y != 14)
+        if (x>0)
             return;
         // CLS
-        if (z == 0) {
+        if (y == 0xE0) {
             for (var j = 0; j < this.screen.length; j++) {
                 this.screen[j] = 0;
             }
         }
         // RET
-        else if (z == 14) {
+        else if (y == 0xEE) {
             if (this.regs.SP >= 0) {
                 this.regs.PC = this.regs.S[this.regs.SP];
                 this.regs.S[this.regs.SP] = 0;
