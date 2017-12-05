@@ -138,7 +138,7 @@ const instructions = [
         [(trail) => (last_two(trail) == 0x1E), (trail) => ({inst: 'ADD', params: ['I', `V${first(trail)}`]})],
         [(trail) => (last_two(trail) == 0x29), (trail) => ({inst: 'LD', params: ['F', `V${first(trail)}`]})],
         [(trail) => (last_two(trail) == 0x33), (trail) => ({inst: 'LD', params: ['B', `V${first(trail)}`]})],
-        [(trail) => (last_two(trail) == 0x55), (trail) => ({inst: 'LD', params: ['[I]', `V${first(trail)}`]})],
+        [(trail) => (last_two(trail) == 0x55), (trail) => ({inst: 'LD', params: ['I', `V${first(trail)}`]})],
         [(trail) => (last_two(trail) == 0x65), (trail) => ({inst: 'LD', params: [`V${first(trail)}`, '[I]']})]
     ]
 ];
@@ -165,26 +165,29 @@ var getValue = (val, emulator) => {
     // TODO: Handle more cases
     if (val in emulator.regs) {
         // Get value from registry
-        return emulator.regs[parseInt(val[1])];
+        return emulator.regs[val[1]];
     } else if (/^\d+$/.test(val)) {
         return parseInt(val); // Parse hex value
     }
 };
 
 var getSetter = (dest, emulator) => {
-    if (dest in emulator.regs) return val => emulator.regs[dest] = val;
-
+    if (dest in emulator.regs) {
+        return val => emulator.regs[dest] = val;
+    } else {
+        throw `Unknown registry ${dest}`;
+    }
 }
 
 var executeInstruction = (emulator, opcode) => {
-    let { inst, params } = wordToASM(opcodeToHex(opcode));
+    let { inst, params } = wordToASM(opcode);
     switch(inst) {
         case 'JP':
             let setter = getSetter('PC', emulator);
             if (params.length === 1)
-                setter(parseInt(params[0], 16));
+                setter(params[0]);
             else
-                setter(getValue(params[0]) + parseInt(params[1], 16));
+                setter(getValue(params[0]) + params[1]);
             break;
         case 'LD':
             getSetter(params[0], emulator)(params[1]);
