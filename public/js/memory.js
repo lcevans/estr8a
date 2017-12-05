@@ -12,7 +12,7 @@ var memoryLineToText = (memory, row) => {
         lineText = `${lineText}${space}${hex}`;
     }
     return lineText;
-}
+};
 
 // Render initial state of memory to the screen.
 var initializeMemoryDisplay = () => {

@@ -16,11 +16,13 @@ And then maps these keyboard keys to them:
 var keyCodes = [88, 49, 50, 51, 81, 87, 69, 65, 83, 68, 90, 67, 52, 82, 70, 86];
 var keysDown = {};
 
-document.onkeydown = function(event) {
-    keysDown[event.keyCode] = true;
-};
-document.onkeyup = function(event) {
-    keysDown[event.keyCode] = false;
+var initializeKeyboard = () => {
+    document.onkeydown = function(event) {
+        keysDown[event.keyCode] = true;
+    };
+    document.onkeyup = function(event) {
+        keysDown[event.keyCode] = false;
+    };
 };
 
 // keyCode is 0 - 15 representing 0-F keys on the chip keyboard

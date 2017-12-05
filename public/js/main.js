@@ -12,8 +12,8 @@ var main = () => {
     // draw the screen.
     initializeCanvas(emulator.screenWidth, emulator.screenHeight);
 
-    // This should setup the keyboard for tracking the 0-F keys being pressed
-    // setupInput();
+    // Setup listeners for the keys that map to the 0-F chip 8 keys.
+    initializeKeyboard();
 
     // Initialize Sound
     initializeSound();
