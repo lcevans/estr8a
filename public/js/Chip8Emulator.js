@@ -71,8 +71,9 @@ class Chip8Emulator {
         var op = this.memory[this.regs.PC];
 
         // Decode Opcode
-
+        // TODO: Create a mapping from most significant word to method from the selection below
         // Execute Opcode
+        // TODO: Call appropriate method below with the instruction as an argument.
 
         // Update PC
         this.regs.PC++;
