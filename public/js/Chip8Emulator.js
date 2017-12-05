@@ -12,15 +12,16 @@ class Chip8Emulator {
             'DT': 0,   // Delay timer
             'ST': 0,   // Sound timer
         }
+        for (i=0; i<=0xF; i++) {
+            this.regs[`V${i.toString(16)}`] = 0;
+        }
         this.memory = new Uint8Array(4096);
-        this.registers = new Uint8Array(17);
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         // Each pixel only needs 1 bit, so we divide by 8 here to get the length we need.
         this.screen = new Uint8Array(Math.ceil(screenWidth * screenHeight / 8));
         this.drawFlag = false;
         this.mainLoopId = null;
-        this.programCounter = 0x200;
 
         // This is dummy code to test that drawing the screen works roughly how we are expecting:
         for (var i = 0; i < 16; i++) {
@@ -41,13 +42,14 @@ class Chip8Emulator {
             }
         }).then(ab => {
             var gd = new Uint8Array(ab);
-            return gd;}).then(gameData => {
+            return gd;
+        }).then(gameData => {
                 console.log("Loading", gameData.length, "bytes!");
                 for (var i = 0; i < gameData.length; i++) {
                     // Write the loaded game to memory starting at 0x200.
                     this.memory[0x200 + i] = gameData[i];
                 }
-            });
+        });
     }
 
     // x/y are one a werid 8x1 grid to make this simpler.
@@ -68,11 +70,11 @@ class Chip8Emulator {
     }
 
     moveToNextInstruction() {
-        this.programCounter += 2;
+        this.regs.PC += 2;
     }
 
     fetchOpcode() {
-        let opcode = this.memory[this.programCounter] << 8 | this.memory[this.programCounter + 1];
+        let opcode = this.memory[this.regs.PC] << 8 | this.memory[this.regs.PC + 1];
         this.moveToNextInstruction();
         return opcode;
     }
@@ -82,17 +84,14 @@ class Chip8Emulator {
     }
 
     emulationLoop() {
-
         // Fetch Opcode
-        var op = this.memory[this.regs.PC];
+        const op = this.fetchOpcode();
+        const inst = this.executeOpcode(op);
 
         // Decode Opcode
         // TODO: Create a mapping from most significant word to method from the selection below
         // Execute Opcode
         // TODO: Call appropriate method below with the instruction as an argument.
-
-        // Update PC
-        this.regs.PC += 2;
 
         // ---- RIC CODE -----
         // let opcode = fetchOpcode();
