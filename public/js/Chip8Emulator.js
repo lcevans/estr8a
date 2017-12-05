@@ -9,6 +9,9 @@ class Chip8Emulator {
         this.machine = MakeMachine(screenSize);
         this.drawFlag = false;
         this.mainLoopId = null;
+        // This is named to indicate whether the emulator should play if
+        // a game is loaded.
+        this.shouldPlay = true;
 
         // This is dummy code to test that drawing the screen works roughly how we are expecting:
         for (var i = 0; i < 16; i++) {
@@ -34,7 +37,9 @@ class Chip8Emulator {
         }).then(gameData => {
             console.log("Loading", gameData.length, "bytes!");
             this.machine.loadGame(gameData);
-            this.startEmulator();
+            if (this.shouldPlay) {
+                this.startEmulator();
+            }
         });
     }
 
@@ -46,6 +51,7 @@ class Chip8Emulator {
     }
 
     startEmulator() {
+        this.shouldPlay = true;
         // Clear the existing emulation loop, if for some reason this is called while emulation
         // is already running.
         if (this.mainLoopId) {
@@ -53,6 +59,23 @@ class Chip8Emulator {
         }
         this.mainLoopId = setInterval(() => this.emulationLoop(), TICK_MS);
         window.requestAnimationFrame(() => this.renderLoop());
+    }
+
+    pauseEmulator() {
+        this.shouldPlay = false;
+        if (this.mainLoopId) {
+            clearInterval(this.mainLoopId);
+            // We read this.mainLoopId to determine if
+            // the emulator is currently playing.
+            this.mainLoopId = null;
+        }
+    }
+
+    step() {
+        this.machine.tick();
+        // The render loop doesn't run while the emulator is paused, so we need
+        // to manually call it every time we step.
+        this.renderLoop();
     }
 
     emulationLoop() {
