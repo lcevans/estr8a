@@ -295,7 +295,7 @@ class Chip8Machine {
     //////////////////////////////////
     RND(inst) {
         var [x, num] = this.extractPayload(inst);
-        var rand = 1l
+        var rand = 1;
         while (rand == 1) {
             rand = Math.random();
         }
@@ -310,6 +310,25 @@ class Chip8Machine {
         var [x,y,n] = this.extractRegs(inst);
     }
 
+    ///////////////////////////////////////////////////////////////////////
+    // Ex9E - SKP Vx                                                     //
+    // Skip next instruction if key with the value of Vx is pressed.     //
+    // ExA1 - SKNP Vx                                                    //
+    // Skip next instruction if key with the value of Vx is not pressed. //
+    ///////////////////////////////////////////////////////////////////////
+    KBD(inst) {
+        var [x,num] = thisextractReg(inst);
+        if (num == 0x9E)
+            if (isChipKeyDown(x))
+                this.PC += 2;
+        else if (num == 0xA1)
+            if (! isChipKeyDown(x))
+                this.PC += 2;
+        else {
+            console.log(this);
+            throw "Unrecognized instruction";
+        }
+    }
 
 
 }
