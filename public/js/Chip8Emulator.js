@@ -49,6 +49,8 @@ class Chip8Emulator {
                     // Write the loaded game to memory starting at 0x200.
                     this.memory[0x200 + i] = gameData[i];
                 }
+            initializeMemoryDisplay();
+            emulator.startEmulator();
         });
     }
 

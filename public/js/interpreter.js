@@ -111,7 +111,7 @@ var opcodeToHex = (opcode) => {
 
 var getValue = (val, emulator) => {
     // TODO: Handle more cases
-    if (dest in emulator.regs) {
+    if (val in emulator.regs) {
         // Get value from registry
         return emulator.registers[parseInt(val[1])];
     } else if (/^\d+$/.test(val)) {
