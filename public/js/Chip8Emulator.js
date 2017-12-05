@@ -75,7 +75,7 @@ class Chip8Emulator {
     }
 
     drawGraphics() {
-        drawEmulatorToCanvas(this.machine);
+        drawEmulatorToCanvas(this);
     }
 
 }
