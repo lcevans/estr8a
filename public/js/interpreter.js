@@ -1,14 +1,31 @@
+const NIBBLE = 4;
+const BYTE = 8;
+const SLAB = 12;
 const inst8 = {
-    '0': 'LD',
-    '1': 'OR',
-    '2': 'AND',
-    '3': 'XOR',
-    '4': 'ADD',
-    '5': 'SUB',
-    '6': 'SHR',
-    '7': 'SUBN',
-    'E': 'SHL'
+    0: 'LD',
+    1: 'OR',
+    2: 'AND',
+    3: 'XOR',
+    4: 'ADD',
+    5: 'SUB',
+    6: 'SHR',
+    7: 'SUBN',
+    0xE: 'SHL'
 }
+// Given a number N bits long and a bit number, splits the number in two parts:
+// [first `N-bit` bits, last `bit` bits]
+// The following methods assume number to be a 12 bit int
+const split_bits = (number, bits) => [number >> bits, number & ((2 << bits-1) - 1)];
+const last_two = (number) => number & 0xFF;
+const first = (number) => number >> 8;
+const first_and_last_two = (number) => split_bits(number, 8); // returns 0xX and 0xYZ out of 0xXYZ
+const first_and_second = (number) => split_bits(number >> 4, 4); // returns 0xX and 0xY out of 0xXYZ
+const third = (number) => number & 0xF;
+const first_second_and_third = (number) => [ ...first_and_second(number), third(number)]; // return 0xX, 0xY and 0xZ out of 0xXYZ
+
+// Te following method assumes word to be a 16 bit int
+const first_of_word = (word) => word >> 12;
+
 // 00E0 - CLS            00EE - RET
 // 0nnn - SYS addr       1nnn - JP addr
 // 2nnn - CALL addr      3xkk - SE Vx, byte
@@ -28,81 +45,116 @@ const inst8 = {
 // Fx1E - ADD I, Vx      Fx29 - LD F, Vx
 // Fx33 - LD B, Vx       Fx55 - LD [I], Vx
 // Fx65 - LD Vx, [I]
-const instructions = {
-    '0': [
-        [/0E0/i, () => ({inst: 'CLS'})],
-        [/0EE/i, () => ({inst: 'RET'})],
-        [/(...)/i, (match) => ({inst: 'SYS', params: [match[1]]})]
+const instructions = [
+    [ // 0x0
+        [(trail) => (trail == 0x0E0), () => ({inst: 'CLS'})],
+        [(trail) => (trail == 0x0EE), () => ({inst: 'RET'})],
+        [() => true, (trail) => ({inst: 'SYS', params: [trail]})]
     ],
-    '1': [
-        [/(...)/i, (match) => ({inst: 'JP', params: [match[1]]})]
+    [ // 0x1
+        [() => true, (trail) => ({inst: 'JP', params: [trail]})]
     ],
-    '2': [
-        [/(...)/i, (match) => ({inst: 'CALL', params: [match[1]]})]
+    [ // 0x2
+        [() => true, (trail) => ({inst: 'CALL', params: [trail]})]
     ],
-    '3': [
-        [/(.)(..)/i, (match) => ({inst: 'SE', params: [`V${match[1]}`, match[2]]})]
+    [ // 0x3
+        [() => true, (trail) => {
+            const [first, last_two] = first_and_last_two(trail);
+            return {inst: 'SE', params: [`V${first}`, last_two]};
+        }]
     ],
-    '4': [
-        [/(.)(..)/i, (match) => ({inst: 'SNE', params: [`V${match[1]}`, match[2]]})]
+    [ // 0x4
+        [() => true, (trail) => {
+            const [first, last_two] = first_and_last_two(trail);
+            return {inst: 'SNE', params: [`V${first}`, last_two]};
+        }]
     ],
-    '5': [
-        [/(.)(.)0/i, (match) => ({inst: 'SE', params: [`V${match[1]}`, `V${match[2]}`]})]
+    [ // 0x5
+        [(trail) => (third(trail) == 0), (trail) => {
+            const [first, second] = first_and_second(trail);
+            return {inst: 'SE', params: [`V${first}`, `V${second}`]};
+        }]
     ],
-    '6': [
-        [/(.)(..)/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, match[2]]})]
+    [ // 0x6
+        [() => true, (trail) => {
+            const [first, last_two] = first_and_last_two(trail);
+            return {inst: 'LD', params: [`V${first}`, last_two]};
+        }]
     ],
-    '7': [
-        [/(.)(..)/i, (match) => ({inst: 'ADD', params: [`V${match[1]}`, match[2]]})]
+    [ // 0x7
+        [() => true, (trail) => {
+            const [first, last_two] = first_and_last_two(trail);
+            return {inst: 'ADD', params: [`V${first}`, last_two]};
+        }]
     ],
-    '8': [
-        [/(.)(.)([0-7E])/i, (match) => ({inst: inst8[match[3].toUpperCase()], params: [`V${match[1]}`, `V${match[2]}`]})]
+    [ // 0x8
+        [(trail) => {
+            const trail_char = third(trail);
+            return trail_char <= 7 || trail_char == 0xE;
+        }, (trail) => {
+            const [first, second, third] = first_second_and_third(trail);
+            return {inst: inst8[third], params: [`V${first}`, `V${second}`]};
+        }]
     ],
-    '9': [
-        [/(.)(.)0/i, (match) => ({inst: 'SNE', params: [`V${match[1]}`, `V${match[2]}`]})]
+    [ // 0x9
+        [(trail) => (third(trail) == 0), (trail) => {
+            const [first, second] = split_bits(trail >> 4, 4);
+            return {inst: 'SNE', params: [`V${first}`, `V${second}`]}
+        }]
     ],
-    'A': [
-        [/(.{3})/i, (match) => ({inst: 'LD', params: ['I', match[1]]})]
+    [ // 0xA
+        [() => true, (trail) => ({inst: 'LD', params: ['I', trail]})]
     ],
-    'B': [
-        [/(...)/i, (match) => ({inst: 'JP', params: ['V0', match[1]]})]
+    [ // 0xB
+        [() => true, (trail) => ({inst: 'JP', params: ['V0', trail]})]
     ],
-    'C': [
-        [/(.)(..)/i, (match) => ({inst: 'RND', params: [`V${match[1]}`, match[2]]})]
+    [ // 0xC
+        [() => true, (trail) => {
+            const [first, last_two] = first_and_last_two(trail);
+            return {inst: 'RND', params: [`V${first}`, last_two]};
+        }]
     ],
-    'D': [
-        [/(.)(.)(.)/i, (match) => ({inst: 'DRW', Vx: match[1], Vy: match[2], nibble: match[3]})]
+    [ // 0xD
+        [() => true, (trail) => {
+            const [first, second, third] = first_second_and_third(trail);
+            return {inst: 'DRW', params: [`V${first}`, `V${second}`, third]};
+        }]
     ],
-    'E': [
-        [/(.)9E/i, (match) => ({inst: 'SKP', params: [`V${match[1]}`]})],
-        [/(.)A1/i, (match) => ({inst: 'SKNP', params: [`V${match[1]}`]})]
+    [ // 0xE
+        [(trail) => (last_two(trail) == 0x9E), (trail) => {
+            const [first, ] = first_and_last_two(trail);
+            return {inst: 'SKP', params: [`V${first}`]};
+        }],
+        [(trail) => (last_two(trail) == 0xA1), (trail) => {
+            const [first, ] = first_and_last_two(trail);
+            return {inst: 'SKNP', params: [`V${first}`]}
+        }]
     ],
-    'F': [
-        [/(.)07/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
-        [/(.)0A/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
-        [/(.)15/i, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
-        [/(.)18/i, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
-        [/(.)1E/i, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
-        [/(.)29/i, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
-        [/(.)33/i, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
-        [/(.)55/i, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
-        [/(.)65/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
+    [ // 0xF
+        [(trail) => (last_two(trail) == 0x07), (trail) => ({inst: 'LD', params: [`V${first(trail)}`, 'DT']})],
+        [(trail) => (last_two(trail) == 0x0A), (trail) => ({inst: 'LD', params: [`V${first(trail)}`, 'K']})],
+        [(trail) => (last_two(trail) == 0x15), (trail) => ({inst: 'LD', params: ['DT', `V${first(trail)}`]})],
+        [(trail) => (last_two(trail) == 0x18), (trail) => ({inst: 'LD', params: ['ST', `V${first(trail)}`]})],
+        [(trail) => (last_two(trail) == 0x1E), (trail) => ({inst: 'ADD', params: ['I', `V${first(trail)}`]})],
+        [(trail) => (last_two(trail) == 0x29), (trail) => ({inst: 'LD', params: ['F', `V${first(trail)}`]})],
+        [(trail) => (last_two(trail) == 0x33), (trail) => ({inst: 'LD', params: ['B', `V${first(trail)}`]})],
+        [(trail) => (last_two(trail) == 0x55), (trail) => ({inst: 'LD', params: ['I', `V${first(trail)}`]})],
+        [(trail) => (last_two(trail) == 0x65), (trail) => ({inst: 'LD', params: [`V${first(trail)}`, '[I]']})]
     ]
-}
+];
 
 // Converts two byte heximal to an instruction object
 
 var wordToASM = (hexWord) => {
-    const instructionSet = instructions[hexWord[0].toUpperCase()];
-    const trailingPart = hexWord.slice(1);
+    const instructionSet = instructions[first_of_word(hexWord)];
+    const trailingPart = hexWord & 0xFFF;
     for (const instruction of instructionSet) {
-        const [regex, interpreter] = instruction;
-        const matched = trailingPart.match(regex);
-        if (matched) {
-            return interpreter(matched);
+        const [matches, interpreter] = instruction;
+        if (matches(trailingPart)) {
+            return interpreter(trailingPart);
         }
     }
-    return `${hexWord} Unknown yet`;
+    return `${hexWord.toString(16)} Unknown yet`;
 }
 
 var opcodeToHex = (opcode) => {
@@ -113,26 +165,29 @@ var getValue = (val, emulator) => {
     // TODO: Handle more cases
     if (val in emulator.regs) {
         // Get value from registry
-        return emulator.regs[parseInt(val[1])];
+        return emulator.regs[val[1]];
     } else if (/^\d+$/.test(val)) {
         return parseInt(val); // Parse hex value
     }
 };
 
 var getSetter = (dest, emulator) => {
-    if (dest in emulator.regs) return val => emulator.regs[dest] = val;
-
+    if (dest in emulator.regs) {
+        return val => emulator.regs[dest] = val;
+    } else {
+        throw `Unknown registry ${dest}`;
+    }
 }
 
 var executeInstruction = (emulator, opcode) => {
-    let { inst, params } = wordToASM(opcodeToHex(opcode));
+    let { inst, params } = wordToASM(opcode);
     switch(inst) {
         case 'JP':
             let setter = getSetter('PC', emulator);
             if (params.length === 1)
-                setter(parseInt(params[0], 16));
+                setter(params[0]);
             else
-                setter(getValue(params[0]) + parseInt(params[1], 16));
+                setter(getValue(params[0]) + params[1]);
             break;
         case 'LD':
             getSetter(params[0], emulator)(params[1]);

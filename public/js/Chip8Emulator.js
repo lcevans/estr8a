@@ -13,7 +13,7 @@ class Chip8Emulator {
             'ST': 0,   // Sound timer
         }
         for (i=0; i<=0xF; i++) {
-            this.regs[`V${i.toString(16)}`] = 0;
+            this.regs[`V${i}`] = 0;
         }
         this.memory = new Uint8Array(4096);
         this.screenWidth = screenWidth;
