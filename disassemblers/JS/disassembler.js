@@ -1,6 +1,9 @@
 console.log("Hello World")
 
 function ASMtoString(asmInstruction) {
+    if (typeof asmInstruction === "string") {
+        return asmInstruction;
+    }
     const inst = asmInstruction['inst'];
     const props = 'params' in asmInstruction ? asmInstruction['params']: [];
     return `${inst} ${props.join(", ").toUpperCase()}`;
@@ -25,8 +28,8 @@ document.onreadystatechange = function() {
                 console.log(i)
                 b0 = view.getUint8(i);
                 b1 = view.getUint8(i+1);
-                hex_str = (b0 >> 4).toString(16) + (b0 & 0xF).toString(16) + (b1 >> 4).toString(16) + (b1 & 0xF).toString(16)
-                my_log(hex_str + " -> " + JSON.stringify(wordToASM(hex_str)))
+                hex_str = (b0 >> 4).toString(16) + (b0 & 0xF).toString(16) + (b1 >> 4).toString(16) + (b1 & 0xF).toString(16);
+                my_log(hex_str + " -> " + ASMtoString(wordToASM(hex_str)));
             }
         });
         reader.readAsArrayBuffer(game_file);

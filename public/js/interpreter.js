@@ -78,15 +78,15 @@ const instructions = {
         [/(.)A1/i, (match) => ({inst: 'SKNP', params: [`V${match[1]}`]})]
     ],
     'F': [
-        [/(.)07/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
-        [/(.)0A/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
-        [/(.)15/, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
-        [/(.)18/, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
-        [/(.)1E/, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
-        [/(.)29/, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
-        [/(.)33/, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
-        [/(.)55/, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
-        [/(.)65/, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
+        [/(.)07/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
+        [/(.)0A/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
+        [/(.)15/i, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
+        [/(.)18/i, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
+        [/(.)1E/i, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
+        [/(.)29/i, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
+        [/(.)33/i, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
+        [/(.)55/i, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
+        [/(.)65/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
     ]
 }
 
