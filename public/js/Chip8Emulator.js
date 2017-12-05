@@ -34,7 +34,7 @@ class Chip8Emulator {
         }).then(gameData => {
             console.log("Loading", gameData.length, "bytes!");
             this.machine.loadGame(gameData);
-            initializeMemoryDisplay();
+            initializeMemoryDisplay(this.machine);
             this.startEmulator();
         });
     }
@@ -67,7 +67,7 @@ class Chip8Emulator {
         }
         // This will update the display of which keys are being pressed.
         updateKeyboard();
-        updateMemoryDisplay(emulator.memory);
+        updateMemoryDisplay(this.machine);
         // Assume that the emulator is still running as long `this.mainLoopId` is set.
         if (this.mainLoopId) {
             window.requestAnimationFrame(() => this.renderLoop());

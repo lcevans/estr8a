@@ -19,7 +19,8 @@ var memoryLineToText = (memory, row) => {
 var displayedMemory = null;
 
 // Render initial state of memory to the screen.
-var initializeMemoryDisplay = (memory) => {
+var initializeMemoryDisplay = (machine) => {
+    var memory = machine.memory;
     // TODO: Display registers as well
     var memoryDiv = document.getElementsByClassName('js-memory')[0];
     for (var row = 0; row < memory.length / 16; row++) {
@@ -35,7 +36,8 @@ var initializeMemoryDisplay = (memory) => {
 };
 
 // Update any lines of memory that have changed since the last time it was displayed.
-var updateMemoryDisplay = (memory) => {
+var updateMemoryDisplay = (machine) => {
+    let memory = machine.memory;
     var memoryDiv = document.getElementsByClassName('js-memory')[0];
     if (memoryDiv.style.display === 'none') {
         return;
