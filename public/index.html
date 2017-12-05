@@ -1,6 +1,14 @@
 <html>
 <body style="background-color: #DDD;">
-  <div class="js-sound">
+  <div id="title-bar">
+    <select id="games-list" style="float: left; margin-right: 10px;">
+      <!-- Populated from call to /api/games -->
+    </select>
+    <input id="load-game" type="button" value="Load Game" style="float: left; margin-right: 10px;">
+    <div id="current-game">No Game Loaded</div>
+  </div>
+
+<div class="js-sound">
     <input id="js-sound-input" type="number">
     <input id="js-sound-button" type="button" value="Start Sound">
     <div id="js-sound-register"></div>
@@ -15,6 +23,7 @@
 <div class="js-keyboard">
 </div>
 </body>
+<script src="/js/titlebar.js"></script>
 <script src="/js/sound.js"></script>
 <script src="/js/keyboard.js"></script>
 <script src="/js/Chip8Emulator.js"></script>

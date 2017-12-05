@@ -18,6 +18,9 @@ var main = () => {
     // Initialize Sound
     initializeSound();
 
+    // Initialize TitleBar
+    initializeTitleBar();
+
     // I'm assuming loading the game will be async and return a promise.
     emulator.loadGame("PONG").then(() => {
         // This just adds an element to the DOM that displays the initial state of the memory.
