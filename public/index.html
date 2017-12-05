@@ -3,6 +3,13 @@
     <link rel="stylesheet" type="text/css" href="css/styles.css"/>
 </head>
 <body>
+  <div id="title-bar">
+    <select id="games-list">
+      <!-- Populated from call to /api/games -->
+    </select>
+    <input id="load-game" type="button" value="Load Game">
+    <div id="current-game">No Game Loaded</div>
+  </div>
   <div class="js-sound">
     <input id="js-sound-input" type="number">
     <input id="js-sound-button" type="button" value="Start Sound">
@@ -19,6 +26,7 @@
     <!-- The keyboard display will be appended here -->
 </div>
 </body>
+<script src="/js/titlebar.js"></script>
 <script src="/js/sound.js"></script>
 <script src="/js/keyboard.js"></script>
 <script src="/js/Chip8Emulator.js"></script>
