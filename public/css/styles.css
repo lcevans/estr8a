@@ -3,6 +3,17 @@ body {
     background-color: #DDD;
 }
 
+/* Titlebar display */
+#games-list {
+    float: left;
+    margin-right: 10px;
+}
+#load-game {
+    float: left;
+    margin-right: 10px;
+}
+
+
 /* Canvas screen display */
 .canvasContainer {
     display:inline-block;

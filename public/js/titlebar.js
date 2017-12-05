@@ -1,4 +1,4 @@
-initializeTitleBar = function () {
+var initializeTitleBar = function () {
 
     // Populate games-list selector
     fetch('api/games/')
@@ -14,12 +14,8 @@ initializeTitleBar = function () {
                 select_dom.appendChild(opt);
             }
     });
-}
 
-
-
-// Handle game loading
-document.onreadystatechange = function() {
+    // Handle game loading
     document.getElementById('load-game').onclick = function() {
         select_dom = document.getElementById('games-list');
         game_to_load = select_dom.options[select_dom.selectedIndex].value
