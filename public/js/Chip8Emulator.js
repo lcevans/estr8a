@@ -108,12 +108,6 @@ class Chip8Emulator {
         if (this.regs.DT > 0) {
             this.regs.DT--;
         }
-
-        // Code for testing the keyboard mapping. This will log 0-F
-        // based on which keys are currently pressed.
-        for (var i = 0; i < 16; i++) {
-            if (isChipKeyDown(i)) console.log(i.toString(16));
-        }
     }
 
     renderLoop() {
@@ -121,6 +115,8 @@ class Chip8Emulator {
             this.drawFlag = false;
             this.drawGraphics();
         }
+        // This will update the display of which keys are being pressed.
+        updateKeyboard();
         // Assume that the emulator is still running as long `this.mainLoopId` is set.
         if (this.mainLoopId) {
             window.requestAnimationFrame(() => this.renderLoop());

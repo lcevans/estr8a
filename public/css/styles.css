@@ -1,0 +1,45 @@
+
+body {
+    background-color: #DDD;
+}
+
+/* Canvas screen display */
+.canvasContainer {
+    display:inline-block;
+    height: 400px;
+    vertical-align: top;
+}
+
+/* Memory display */
+.memory {
+    display: inline-block;
+    height: 400px;
+    vertical-align: top;
+    margin-right: 20px;
+    padding: 5px;
+    border: 1px solid black;
+    overflow-y: scroll;
+    background-color: white;
+    font-family: monospace;
+}
+
+/* Keyboard display */
+.keyboardContainer {
+    display: inline-block;
+    vertical-align: top;
+}
+.keyboardButton {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    font-size: 25px;
+}
+.keyboardButton.active {
+    color: white;
+    background-color: #008;
+    border: none;
+}
+/* Remove outline from around button when focused that is on some browsers. */
+.keyboardButton:focus {
+    outline: none;
+}
