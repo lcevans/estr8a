@@ -78,15 +78,15 @@ const instructions = {
         [/(.)A1/i, (match) => ({inst: 'SKNP', params: [`V${match[1]}`]})]
     ],
     'F': [
-        [/(.)07/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
-        [/(.)0A/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
-        [/(.)15/i, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
-        [/(.)18/i, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
-        [/(.)1E/i, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
-        [/(.)29/i, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
-        [/(.)33/i, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
-        [/(.)55/i, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
-        [/(.)65/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
+        [/(.)07/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
+        [/(.)0A/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
+        [/(.)15/, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
+        [/(.)18/, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
+        [/(.)1E/, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
+        [/(.)29/, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
+        [/(.)33/, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
+        [/(.)55/, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
+        [/(.)65/, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
     ]
 }
 
@@ -102,4 +102,50 @@ var wordToASM = (hexWord) => {
             return interpreter(matched);
         }
     }
+    return `${hexWord} Unknown yet`;
 }
+
+var getValue = (val, emulator) => {
+    // TODO: Handle more cases
+    if (val.startsWith('V')) {
+        // Get value from registry
+        return emulator.registers[parseInt(val[1])];
+    } else if (/^\d+$/.test(val))
+        return parseInt(val); // Parse hex value
+};
+
+var getSetter = (dest, emulator) => {
+    if (dest === 'ADDR') return val => emulator.programCounter = val;
+    if (/V[0-9A-E]/.test(dest)) return val => emulator.registers[parseInt(dest[1])] = val;
+
+}
+
+var executeInstruction = (emulator, opcode) => {
+    let { inst, params } = wordToASM(opcode);
+    switch(inst) {
+        case 'JP':
+            let setter = getSetter('ADDR');
+            if (params.length === 1)
+                setter(parseInt(params[0]));
+            else
+                setter(getValue(params[0]) + parseInt(params[1]));
+            break;
+        case 'LD':
+            getSetter(params[0])(params[1]);
+            break;
+        case 'SE':
+            if (getValue(params[0]) === getValue(params[1]))
+                emulator.moveToNextInstruction();
+            break;
+        case 'SNE':
+            if (getValue(params[0]) !== getValue(params[1]))
+                emulator.moveToNextInstruction();
+            break;
+        case 'OR':
+            getSetter(params[0])(getValue(params[0]) | getValue(params[1]));
+        case 'AND':
+            getSetter(params[0])(getValue(params[0]) & getValue(params[1]));
+        case 'XOR':
+            getSetter(params[0])(getValue(params[0]) ^ getValue(params[1]));
+    };
+};

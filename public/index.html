@@ -1,11 +1,24 @@
 <html>
-<body>
-<div class="js-memory" style="font-family: monospace;">
+<body style="background-color: #DDD;">
+  <div class="js-sound">
+    <input id="js-sound-input" type="number">
+    <input id="js-sound-button" type="button" value="Start Sound">
+    <div id="js-sound-register"></div>
+    <!-- The sound display will be appended here -->
+</div>
+<div class="js-memory" style="font-family: monospace; display: inline-block; vertical-align: top; margin-right: 20px; padding: 5px; border: 1px solid black; overflow-y: scroll; height: 400px; background-color: white;">
+    <!-- The memory display will be appended here -->
+</div>
+<div class="js-canvasContainer" style="display:inline-block; vertical-align: top; height: 400px;">
+    <!-- The canvas display will be appended here -->
 </div>
 </body>
+<script src="/js/sound.js"></script>
+<script src="/js/keyboard.js"></script>
 <script src="/js/Chip8Emulator.js"></script>
 <script src="/js/digits.js"></script>
 <script src="/js/memory.js"></script>
+<script src="/js/canvas.js"></script>
 <script src="/js/main.js"></script>
 <script src="/js/interpreter.js"></script>
 </html>
