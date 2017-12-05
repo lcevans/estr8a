@@ -161,19 +161,19 @@ var opcodeToHex = (opcode) => {
     return opcode.toString(16);
 }
 
-var getValue = (val, emulator) => {
+var getValue = (val, machine) => {
     // TODO: Handle more cases
-    if (val in emulator.regs) {
+    if (val in machine) {
         // Get value from registry
-        return emulator.regs[val[1]];
+        return machine[parseInt(val[1])];
     } else if (/^\d+$/.test(val)) {
         return parseInt(val); // Parse hex value
     }
 };
 
-var getSetter = (dest, emulator) => {
-    if (dest in emulator.regs) {
-        return val => emulator.regs[dest] = val;
+var getSetter = (dest, machine) => {
+    if (dest in machine) {
+        return val => machine[dest] = val;
     } else {
         throw `Unknown registry ${dest}`;
     }
@@ -183,31 +183,31 @@ var executeInstruction = (emulator, opcode) => {
     let { inst, params } = wordToASM(opcode);
     switch(inst) {
         case 'JP':
-            let setter = getSetter('PC', emulator);
+            let setter = getSetter('PC', machine);
             if (params.length === 1)
                 setter(params[0]);
             else
                 setter(getValue(params[0]) + params[1]);
             break;
         case 'LD':
-            getSetter(params[0], emulator)(params[1]);
+            getSetter(params[0], machine)(params[1]);
             break;
         case 'SE':
-            if (getValue(params[0], emulator) === getValue(params[1], emulator))
-                emulator.moveToNextInstruction();
+            if (getValue(params[0], machine) === getValue(params[1], machine))
+                machine.moveToNextInstruction();
             break;
         case 'SNE':
-            if (getValue(params[0], emulator) !== getValue(params[1], emulator))
-                emulator.moveToNextInstruction();
+            if (getValue(params[0], machine) !== getValue(params[1], machine))
+                machine.moveToNextInstruction();
             break;
         case 'OR':
-            getSetter(params[0])(getValue(params[0], emulator) | getValue(params[1], emulator));
+            getSetter(params[0])(getValue(params[0], machine) | getValue(params[1], machine));
             break;
         case 'AND':
-            getSetter(params[0])(getValue(params[0], emulator) & getValue(params[1], emulator));
+            getSetter(params[0])(getValue(params[0], machine) & getValue(params[1], machine));
             break;
         case 'XOR':
-            getSetter(params[0])(getValue(params[0], emulator) ^ getValue(params[1], emulator));
+            getSetter(params[0])(getValue(params[0], machine) ^ getValue(params[1], machine));
             break;
     };
 };
