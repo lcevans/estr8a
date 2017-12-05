@@ -19,12 +19,24 @@ class Chip8Emulator {
 
     loadGame(gameName) {
         // We could add the games somewhere under `/public` and load them with fetch here.
-        return Promise.resolve([0, 0, 0, 0, 0,]).then(gameData => {
-            for (var i = 0; i < gameData.length; i++) {
-                // Write the loaded game to memory starting at 0x200.
-                this.memory[0x200 + i] = gameData[i];
+        return fetch('games/' + gameName).then(function(response) {
+            if (response.ok) {
+                console.log("Fetched", gameName);
+                return response.arrayBuffer();
+            } else {
+                var message = "Unable to load game";
+                console.log(message);
+                return Promise.reject(message);
             }
-        });
+        }).then(ab => {
+            var gd = new Uint8Array(ab);
+            return gd;}).then(gameData => {
+                console.log("Loading", gameData.length, "bytes!");
+                for (var i = 0; i < gameData.length; i++) {
+                    // Write the loaded game to memory starting at 0x200.
+                    this.memory[0x200 + i] = gameData[i];
+                }
+            });
     }
 
     // x/y are one a werid 8x1 grid to make this simpler.
