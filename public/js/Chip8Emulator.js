@@ -92,7 +92,7 @@ class Chip8Emulator {
         // TODO: Call appropriate method below with the instruction as an argument.
 
         // Update PC
-        this.regs.PC++;
+        this.regs.PC += 2;
 
         // ---- RIC CODE -----
         // let opcode = fetchOpcode();
@@ -197,7 +197,7 @@ class Chip8Emulator {
     ///////////////////////////
     JP(inst) {
         var addr = this.extractPayload(inst);
-        this.regs.PC = addr-1;
+        this.regs.PC = addr-2;
     }
 
     /////////////////////////////
@@ -213,7 +213,7 @@ class Chip8Emulator {
         this.regs.SP++;
         // Return the the following address
         this.regs.S[this.regs.SP] = this.regs.PC;
-        this.regs.PC = addr-1;
+        this.regs.PC = addr-2;
     }
 
 
@@ -224,7 +224,7 @@ class Chip8Emulator {
     SE3(inst) {
         var [reg,num] = this.extractReg(inst);
         if (this.regs.V[reg] == num) {
-            this.regs.PC++;
+            this.regs.PC+=2;
         }
     }
 
@@ -235,7 +235,7 @@ class Chip8Emulator {
     SNE4(inst) {
         var [reg,num] = this.extractReg(inst);
         if (this.regs.V[reg] != num) {
-            this.regs.PC++;
+            this.regs.PC+=2;
         }
     }
 
@@ -250,7 +250,7 @@ class Chip8Emulator {
             throw "Invalid instruction read!";
         }
         if (this.regs.V[x] == this.regs.V[y]) {
-            this.regs.PC++;
+            this.regs.PC+=2;
         }
     }
 
