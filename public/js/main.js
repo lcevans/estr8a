@@ -21,14 +21,6 @@ var main = () => {
     // Initialize TitleBar
     initializeTitleBar();
 
-    // I'm assuming loading the game will be async and return a promise.
-    emulator.loadGame("PONG").then(() => {
-        // This just adds an element to the DOM that displays the initial state of the memory.
-        // We could add functionality to render to update this as the emulator runs.
-        initializeMemoryDisplay();
-
-        emulator.startEmulator();
-    })
 };
 
 // Run

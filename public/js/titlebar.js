@@ -1,15 +1,19 @@
 initializeTitleBar = function () {
-    // Populate selector
-    games = ['PONG', 'DEBUG', 'BLITZ']
 
-    select_dom = document.getElementById('games-list');
-    for (i=0; i<games.length; i++)
-    {
-        var opt = document.createElement('option');
-        opt.value = games[i];
-        opt.innerHTML = games[i];
-        select_dom.appendChild(opt);
-    }
+    // Populate games-list selector
+    fetch('api/games/')
+        .then((resp) => resp.json())
+        .then(function(data) {
+            games = data.data
+            select_dom = document.getElementById('games-list');
+            for (i=0; i<games.length; i++)
+            {
+                var opt = document.createElement('option');
+                opt.value = games[i].name;
+                opt.innerHTML = games[i].name;
+                select_dom.appendChild(opt);
+            }
+    });
 }
 
 
@@ -17,8 +21,9 @@ initializeTitleBar = function () {
 // Handle game loading
 document.onreadystatechange = function() {
     document.getElementById('load-game').onclick = function() {
-        // PONG for now
-        game_to_load = "PONG";
-        // emulator.loadGame(game_to_load);
+        select_dom = document.getElementById('games-list');
+        game_to_load = select_dom.options[select_dom.selectedIndex].value
+        emulator.loadGame(game_to_load);
+        document.getElementById('current-game').innerHTML=game_to_load;
     };
 }
