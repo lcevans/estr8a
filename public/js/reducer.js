@@ -18,13 +18,14 @@ const step = (state = defaultState, instruction) => {
         case 0x0: {
             switch(instruction) {
                 // CLS
-                case 0x0e0:
+                case 0x00e0:
                     return Object.merge(state, {
                         screen: null,
                         programCounter: state.programCounter++,
                     });
             }
         }
+
         // JP addr
         case 0x1: {
             const addr = instruction & 0x0fff;
@@ -32,8 +33,21 @@ const step = (state = defaultState, instruction) => {
                 programCounter: addr
             });
         }
-            // ... way more horrible code
+
+        // CALL addr
+        case 0x2: {
+            const addr = instruction & 0x0fff;
+            const stack = state.stack;
+            stack[state.stackPointer] = state.programCounter;
+            // FIXME throw a horrible exception for stack overflow
+            return Object.merge(state, {
+                stack,
+                stackPointer: state.stackPointer++,
+                programCounter: addr,
+            });
+
     }
+    return state;
 };
 
 
