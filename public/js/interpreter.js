@@ -30,73 +30,74 @@ const inst8 = {
 // Fx65 - LD Vx, [I]
 const instructions = {
     '0': [
-        [/0E0/g, () => ({inst: 'CLS'})],
-        [/0EE/, () => ({inst: 'RET'})],
-        [/(...)/, (match) => ({inst: 'SYS', params: [match[1]]})]
+        [/0E0/i, () => ({inst: 'CLS'})],
+        [/0EE/i, () => ({inst: 'RET'})],
+        [/(...)/i, (match) => ({inst: 'SYS', params: [match[1]]})]
     ],
     '1': [
-        [/(...)/, (match) => ({inst: 'JP', params: [match[1]]})]
+        [/(...)/i, (match) => ({inst: 'JP', params: [match[1]]})]
     ],
     '2': [
-        [/(...)/, (match) => ({inst: 'CALL', params: [match[1]]})]
+        [/(...)/i, (match) => ({inst: 'CALL', params: [match[1]]})]
     ],
     '3': [
-        [/(.)(..)/, (match) => ({inst: 'SE', params: [`V${match[1]}`, match[2]]})]
+        [/(.)(..)/i, (match) => ({inst: 'SE', params: [`V${match[1]}`, match[2]]})]
     ],
     '4': [
-        [/(.)(..)/, (match) => ({inst: 'SNE', params: [`V${match[1]}`, match[2]]})]
+        [/(.)(..)/i, (match) => ({inst: 'SNE', params: [`V${match[1]}`, match[2]]})]
     ],
     '5': [
-        [/(.)(.)0/, (match) => ({inst: 'SE', params: [`V${match[1]}`, `V${match[2]}`]})]
+        [/(.)(.)0/i, (match) => ({inst: 'SE', params: [`V${match[1]}`, `V${match[2]}`]})]
     ],
     '6': [
-        [/(.)(..)/, (match) => ({inst: 'LD', params: [`V${match[1]}`, match[2]]})]
+        [/(.)(..)/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, match[2]]})]
     ],
     '7': [
-        [/(.)(..)/, (match) => ({inst: 'ADD', params: [`V${match[1]}`, match[2]]})]
+        [/(.)(..)/i, (match) => ({inst: 'ADD', params: [`V${match[1]}`, match[2]]})]
     ],
     '8': [
-        [/(.)(.)([0-7E])/, (match) => ({inst: inst8[match[3]], params: [`V${match[1]}`, `V${match[2]}`]})]
+        [/(.)(.)([0-7E])/i, (match) => ({inst: inst8[match[3]], params: [`V${match[1]}`, `V${match[2]}`]})]
     ],
     '9': [
-        [/(.)(.)0/, (match) => ({inst: 'SNE', params: [`V${match[1]}`, `V${match[2]}`]})]
+        [/(.)(.)0/i, (match) => ({inst: 'SNE', params: [`V${match[1]}`, `V${match[2]}`]})]
     ],
     'A': [
-        [/(.{3})/, (match) => ({inst: 'LD', params: ['I', match[1]]})]
+        [/(.{3})/i, (match) => ({inst: 'LD', params: ['I', match[1]]})]
     ],
     'B': [
-        [/(...)/, (match) => ({inst: 'JP', params: ['V0', match[1]]})]
+        [/(...)/i, (match) => ({inst: 'JP', params: ['V0', match[1]]})]
     ],
     'C': [
-        [/(.)(..)/, (match) => ({inst: 'RND', params: [`V${match[1]}`, match[2]]})]
+        [/(.)(..)/i, (match) => ({inst: 'RND', params: [`V${match[1]}`, match[2]]})]
     ],
     'D': [
-        [/(.)(.)(.)/, (match) => ({inst: 'DRW', Vx: match[1], Vy: match[2], nibble: match[3]})]
+        [/(.)(.)(.)/i, (match) => ({inst: 'DRW', Vx: match[1], Vy: match[2], nibble: match[3]})]
     ],
     'E': [
-        [/(.)9E/, (match) => ({inst: 'SKP', params: [`V${match[1]}`]})],
-        [/(.)A1/, (match) => ({inst: 'SKNP', params: [`V${match[1]}`]})]
+        [/(.)9E/i, (match) => ({inst: 'SKP', params: [`V${match[1]}`]})],
+        [/(.)A1/i, (match) => ({inst: 'SKNP', params: [`V${match[1]}`]})]
     ],
     'F': [
-        [/F(.)07/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
-        [/F(.)0A/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
-        [/F(.)15/, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
-        [/F(.)18/, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
-        [/F(.)1E/, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
-        [/F(.)29/, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
-        [/F(.)33/, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
-        [/F(.)55/, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
-        [/F(.)65/, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
+        [/(.)07/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
+        [/(.)0A/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
+        [/(.)15/i, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
+        [/(.)18/i, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
+        [/(.)1E/i, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
+        [/(.)29/i, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
+        [/(.)33/i, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
+        [/(.)55/i, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
+        [/(.)65/i, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
     ]
 }
 
 // Converts two byte heximal to an instruction object
 
 var wordToASM = (hexWord) => {
-    const instructionSet = instructions[hexWord[0]];
+    const instructionSet = instructions[hexWord[0].toUpperCase()];
+    const trailingPart = hexWord.slice(1);
     for (const instruction of instructionSet) {
         const [regex, interpreter] = instruction;
-        const matched = regex.exec(hexWord.slice(1));
+        const matched = trailingPart.match(regex);
         if (matched) {
             return interpreter(matched);
         }

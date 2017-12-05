@@ -1,5 +1,10 @@
 console.log("Hello World")
 
+function ASMtoString(asmInstruction) {
+    const inst = asmInstruction['inst'];
+    const props = 'params' in asmInstruction ? asmInstruction['params']: [];
+    return `${inst} ${props.join(", ").toUpperCase()}`;
+}
 document.onreadystatechange = function() {
     document.getElementById('fileInput').onchange = function(e) {
 
@@ -18,8 +23,8 @@ document.onreadystatechange = function() {
             for(i=0; i < game.byteLength; i = i + 2) {
                 b0 = view.getUint8(i);
                 b1 = view.getUint8(i+1);
-                hex_str = (b0 >> 4).toString(16) + (b0 & 0xF).toString(16) + (b1 >> 4).toString(16) + (b1 & 0xF).toString(16)
-                my_log(hex_str + " -> " + JSON.stringify(wordToASM(hex_str)))
+                hex_str = (b0 >> 4).toString(16) + (b0 & 0xF).toString(16) + (b1 >> 4).toString(16) + (b1 & 0xF).toString(16);
+                my_log(hex_str + " -> " + ASMtoString(wordToASM(hex_str)));
             }
         });
         reader.readAsArrayBuffer(game_file);
