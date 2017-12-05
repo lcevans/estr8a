@@ -103,3 +103,48 @@ var wordToASM = (hexWord) => {
     }
     return `${hexWord} Unknown yet`;
 }
+
+var getValue = (val, emulator) => {
+    // TODO: Handle more cases
+    if (val.startsWith('V')) {
+        // Get value from registry
+        return emulator.registers[parseInt(val[1])];
+    } else if (/^\d+$/.test(val))
+        return parseInt(val); // Parse hex value
+};
+
+var getSetter = (dest, emulator) => {
+    if (dest === 'ADDR') return val => emulator.programCounter = val;
+    if (/V[0-9A-E]/.test(dest)) return val => emulator.registers[parseInt(dest[1])] = val;
+
+}
+
+var executeInstruction = (emulator, opcode) => {
+    let { inst, params } = wordToASM(opcode);
+    switch(inst) {
+        case 'JP':
+            let setter = getSetter('ADDR');
+            if (params.length === 1)
+                setter(parseInt(params[0]));
+            else
+                setter(getValue(params[0]) + parseInt(params[1]));
+            break;
+        case 'LD':
+            getSetter(params[0])(params[1]);
+            break;
+        case 'SE':
+            if (getValue(params[0]) === getValue(params[1]))
+                emulator.moveToNextInstruction();
+            break;
+        case 'SNE':
+            if (getValue(params[0]) !== getValue(params[1]))
+                emulator.moveToNextInstruction();
+            break;
+        case 'OR':
+            getSetter(params[0])(getValue(params[0]) | getValue(params[1]));
+        case 'AND':
+            getSetter(params[0])(getValue(params[0]) & getValue(params[1]));
+        case 'XOR':
+            getSetter(params[0])(getValue(params[0]) ^ getValue(params[1]));
+    };
+};
