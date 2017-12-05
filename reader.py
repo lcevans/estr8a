@@ -78,6 +78,34 @@ def explain(instruction):
         regb = instruction[2]
         n = instruction[3]
         return f'Draw a sprite of {n} bytes from the address stored at I to (V{rega}, V{regb}), Vf is set to whether or not a pixel was erased.'
+    if instruction.startswith('e'):
+        # Looks like keyboard functions
+        reg = instruction[1]
+        if instruction.endswith('9e'):
+            return f'Skip the next instruction if the key in V{reg} is pressed'
+        if instruction.endswith('a1'):
+            return f'Skip the next instruction if the key in V{reg} is not pressed'
+    if instruction.startswith('f'):
+        # or the kitchen sinc
+        reg = instruction[1]
+        if instruction.endswith('07'):
+            return f'Load the value of DT into the register V{reg}'
+        if instruction.endswith('0a'):
+            return f'Wait for a keypress and store the value at register V{reg}'
+        if instruction.endswith('15'):
+            return f'Set the value of DT to the value in the register V{reg}'
+        if instruction.endswith('18'):
+            return f'Set the sound timer to the value in the register V{reg}'
+        if instruction.endswith('1e'):
+            return f'Set the value of I to the sum of I and V{reg}'
+        if instruction.endswith('29'):
+            return f'Set I to the location of the sprite of the digit V{reg}'
+        if instruction.endswith('33'):
+            return f'Store the BCD representation of V{reg} at locations I, I+1, I+2'
+        if instruction.endswith('55'):
+            return f'Store the values of registers V0 through V{reg} in memory starting at position I'
+        if instruction.endswith('65'):
+            return f'Load the values of registers V0 through V{reg} from memory starting at position I'
     return ''
 
 

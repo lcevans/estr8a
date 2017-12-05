@@ -78,15 +78,15 @@ const instructions = {
         [/(.)A1/, (match) => ({inst: 'SKNP', params: [`V${match[1]}`]})]
     ],
     'F': [
-        [/F(.)07/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
-        [/F(.)0A/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
-        [/F(.)15/, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
-        [/F(.)18/, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
-        [/F(.)1E/, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
-        [/F(.)29/, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
-        [/F(.)33/, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
-        [/F(.)55/, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
-        [/F(.)65/, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
+        [/(.)07/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'DT']})],
+        [/(.)0A/, (match) => ({inst: 'LD', params: [`V${match[1]}`, 'K']})],
+        [/(.)15/, (match) => ({inst: 'LD', params: ['DT', `V${match[1]}`]})],
+        [/(.)18/, (match) => ({inst: 'LD', params: ['ST', `V${match[1]}`]})],
+        [/(.)1E/, (match) => ({inst: 'ADD', params: ['I', `V${match[1]}`]})],
+        [/(.)29/, (match) => ({inst: 'LD', params: ['F', `V${match[1]}`]})],
+        [/(.)33/, (match) => ({inst: 'LD', params: ['B', `V${match[1]}`]})],
+        [/(.)55/, (match) => ({inst: 'LD', params: ['[I]', `V${match[1]}`]})],
+        [/(.)65/, (match) => ({inst: 'LD', params: [`V${match[1]}`, '[I]']})]
     ]
 }
 
@@ -101,4 +101,5 @@ var wordToASM = (hexWord) => {
             return interpreter(matched);
         }
     }
+    return `${hexWord} Unknown yet`;
 }
