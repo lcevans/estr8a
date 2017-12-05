@@ -113,7 +113,7 @@ var getValue = (val, emulator) => {
     // TODO: Handle more cases
     if (val in emulator.regs) {
         // Get value from registry
-        return emulator.registers[parseInt(val[1])];
+        return emulator.regs[parseInt(val[1])];
     } else if (/^\d+$/.test(val)) {
         return parseInt(val); // Parse hex value
     }
