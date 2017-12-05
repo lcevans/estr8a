@@ -34,7 +34,6 @@ class Chip8Emulator {
         }).then(gameData => {
             console.log("Loading", gameData.length, "bytes!");
             this.machine.loadGame(gameData);
-            initializeMemoryDisplay(this.machine);
             this.startEmulator();
         });
     }
@@ -57,6 +56,7 @@ class Chip8Emulator {
     }
 
     emulationLoop() {
+        updateMemoryDisplay(this.machine);
         this.machine.tick()
     }
 
