@@ -31,7 +31,7 @@ class Chip8Emulator {
     }
     loadGame(gameName) {
         // We could add the games somewhere under `/public` and load them with fetch here.
-        return fetch('games/' + gameName).then(function(response) {
+        return fetch('api/games/' + gameName).then(function(response) {
             if (response.ok) {
                 console.log("Fetched", gameName);
                 return response.arrayBuffer();
