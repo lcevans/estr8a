@@ -53,6 +53,7 @@ var initializeKeyboard = () => {
     }
 };
 
+// Update the display of which chip 8 keys are pressed.
 var updateKeyboard = () => {
     for (var button of document.getElementsByClassName("js-keyboardButton")) {
         var key  = parseInt(button.getAttribute('data-key'), 16);
