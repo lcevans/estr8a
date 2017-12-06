@@ -20,16 +20,24 @@ const defaultState = {
 
 const reducerModule = {
     step: (state = defaultState, instruction) => {
+        if (typeof(instruction) === 'undefined') {
+            console.warn('Using default state');
+            return state;
+        }
+        const displayInstruction = '0x' + instruction.toString(16)
         const opCode = (instruction & 0xF000) >> 12;
         switch(opCode) {
             case 0x0: {
                 switch(instruction) {
                     // CLS
                     case 0x00e0:
-                        return Object.assign({}, reducerModule.initializeScreen(state, state.screenSize),
-                                             { programCounter: state.programCounter + 2 });
+                        return Object.assign(
+                            {},
+                            reducerModule.initializeScreen(state, state.screenSize),
+                            { programCounter: state.programCounter + 2 }
+                        );
                 }
-                break;
+                throw `Unrecognized instruction ${displayInstruction}`;
             }
 
             // JP addr
@@ -197,6 +205,10 @@ const reducerModule = {
                         break;
                     }
 
+                    default:
+                        throw `Unrecognized instruction ${displayInstruction}`;
+
+
                 }
 
                 return Object.assign({}, state, {
@@ -255,14 +267,19 @@ const reducerModule = {
                 break; // Till we return
             }
 
+            default:
+                throw `Unrecognized instruction ${displayInstruction}`;
+
         }
         return state;
     },
 
-    loadProgram: (state = defaultState, program) => {
+    loadProgram: (program) => {
+        const state = Object.assign({}, defaultState);
         const memory = state.memory.slice();
+        const reserved = 0x200;
         for (let i = 0; i < program.length; i++) {
-            memory[i] = program[i];
+            memory[reserved + i] = program[i];
         }
         return Object.assign({}, state, { memory });
     },
