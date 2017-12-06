@@ -6,11 +6,13 @@ const FONT_ADDRESS = 0x0;
 
 const defaultState = {
     memory: addChipFontsAtAddress(new Uint8Array(0x1000), FONT_ADDRESS),
-    register: new Uint8Array(0x10),
+    register: new Uint8Array(0x10), // VX
     stack: new Uint16Array(0x10),
-    programCounter: 0x200,
+    programCounter: 0x200, // PC
     stackPointer: 0x0,
-    iRegister: 0x0,
+    iRegister: 0x0, // I
+    stRegister: 0, // ST
+    dtRegister: 0, // DT
     screen: null,
     screenSize: 0,
     // the keyboard could be updated separately
@@ -24,6 +26,10 @@ const reducerModule = {
             console.warn('Using default state');
             return state;
         }
+        // Decrement DT and ST if positive
+        if(state.stRegister > 0) state.stRegister--;
+        if(state.dtRegister > 0) state.dtRegister--;
+
         const displayInstruction = '0x' + instruction.toString(16)
         const opCode = (instruction & 0xF000) >> 12;
         switch(opCode) {
@@ -264,6 +270,114 @@ const reducerModule = {
                 const y = (instruction & 0x00f0) >> 4;
                 const n = (instruction & 0x000f) >> 0;
                 // TODO Biggest ever
+                break; // Till we return
+            }
+
+            // Misc comands (mostly LD)
+            case 0xf: {
+                const x = (instruction & 0x0f00) >> 8;
+                const subOpCode = (instruction & 0x00ff);
+                switch(subOpCode) {
+                    // LD Vx, DT
+                    case 0x07: {
+                        state.register[x] = state.dtRegister;
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                    // LD Vx, K
+                    // Wait for a key press, store the value of the key in Vx.
+                    // We simulate this by decreasing PC if no key is down => we will call this command again next cycle
+                    case 0x0a: {
+                        for(var i=1; i<16; i++)
+                        {
+                            if(isChipKeyDown(i)) {
+                                state.register[x] = i;
+                                return Object.assign({}, state, {
+                                    programCounter: state.programCounter + 2,
+                                });
+                                break;
+                            }
+                        }
+                        // No key is down so do nothing (PC unchanged so we will call this command again)
+                        return state;
+                        break;
+                    }
+                    // LD DT, Vx
+                    case 0x15: {
+                        state.dtRegister = state.register[x];
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                    // LD ST, Vx
+                    case 0x18: {
+                        state.stRegister = state.register[x];
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                    // ADD I, Vx
+                    case 0x1e: {
+                        state.iRegister += state.register[x];
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                    // LD F, Vx
+                    // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
+                    case 0x29: {
+                        state.iRegister = 5 * x; // NOTE: This assumes the "chip-font" sprites are loaded here in memory
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                    // LD B, Vx
+                    // The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I,
+                    // the tens digit at location I+1, and the ones digit at location I+2.
+                    case 0x33: {
+                        var number = state.register[x];
+                        const ones_digit = number % 10;
+                        number = (number - ones_digit) / 10;
+                        const tens_digit = number % 10;
+                        const hundreds_digit = (number - ones_digit) / 10;
+                        memory[state.iRegister] = hundreds_digit;
+                        memory[state.iRegister + 1] = tens_digit;
+                        memory[state.iRegister + 2] = ones_digit;
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                    // LD [I], Vx
+                    // The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
+                    case 0x55: {
+                        for (var i=0; i<x+1; i++) {
+                            memory[state.iRegister + i] = state.register[i];
+                        }
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                    // LD Vx, [I]
+                    // The interpreter reads values from memory starting at location I into registers V0 through Vx.
+                    case 0x65: {
+                        for (var i=0; i<x+1; i++) {
+                            state.register[i] = memory[state.iRegister + i];
+                        }
+                        return Object.assign({}, state, {
+                            programCounter: state.programCounter + 2,
+                        });
+                        break;
+                    }
+                }
+
                 break; // Till we return
             }
 
