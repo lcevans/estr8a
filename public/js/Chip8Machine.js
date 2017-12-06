@@ -340,6 +340,43 @@ class Chip8Machine {
     // ExA1 - SKNP Vx
     // Skip next instruction if key with the value of Vx is not pressed.
     SKP(inst) {
+        let [reg, num] = this.extractReg(inst);
+        let keyPressed = isChipKeyDown(this.V[reg]);
+        if ((num === 0x9E && keyPressed) || num === 0xA1 && !keyPressed)
+            this.PC += 2;
+    }
+
+    FN(inst) {
+        let [reg, num] = this.extractReg(inst);
+        switch(num) {
+            case 0x7:
+                this.V[reg] = this.DT;
+                break;
+            case 0xA:
+                break;
+            case 0x15:
+                this.DT = this.V[reg];
+                break;
+            case 0x18:
+                this.V[reg] = this.ST;
+                break;
+            case 0x1E:
+                this.I += this.V[reg];
+                break;
+            case 0x29:
+                break;
+            case 0x33:
+                break;
+            case 0x55:
+                // Store registers V0 through Vx in memory starting at location I
+                for (let i = 0; i <= reg; i++)
+                    this.memory[this.I + i] = this.V[i];
+            case 0x55:
+                // Read registers V0 through Vx from memory starting at location I
+                for (let i = 0; i <= reg; i++)
+                    this.V[i] = this.memory[this.I + i];
+                break;
+        }
     }
 }
 
