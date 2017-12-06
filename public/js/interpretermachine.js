@@ -6,7 +6,7 @@ class InterpreterMachine {
     }
     tick() {
          // Fetch Opcode
-         const instruction = reducerModule.fetchInstruction(this.state);
+         const instruction = reducerModule.nextInstruction(this.state);
          this.state = reducerModule.step(this.state, instruction);
     }
     loadGame(data) {
