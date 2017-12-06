@@ -49,6 +49,7 @@ const step = (state = defaultState, instruction) => {
                 stackPointer: state.stackPointer + 0x1,
                 programCounter: addr,
             });
+        }
 
         // SE Vx, byte
         case 0x3: {
@@ -208,7 +209,7 @@ const step = (state = defaultState, instruction) => {
         case 0xa: {
             const addr = instruction & 0x0fff;
             return Object.merge(state, {
-                iRegister: addr;
+                iRegister: addr,
                 programCounter: state.programCounter + 0x2,
             });
         }
@@ -240,6 +241,11 @@ const step = (state = defaultState, instruction) => {
             const y = (instruction & 0x00f0) >> 4;
             const n = (instruction & 0x000f) >> 0;
             // TODO Biggest ever
+        }
+
+        // Keyboard, assumes key downs are written to state.keyboard
+        case 0xe: {
+            const operation = instruction & 0x00ff;
         }
 
     }

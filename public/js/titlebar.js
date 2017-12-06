@@ -34,6 +34,21 @@ var initializeTitleBar = function () {
     document.getElementById('step-button').onclick = function() {
         emulator.emulationLoop();
     };
+
+
+    var speedSelect = document.getElementById('speed-select');
+    // Initialize the emulator speed to match the initially selected speed option.
+    emulator.instructionsPerSecond = parseInt(speedSelect.options[speedSelect.selectedIndex].value);
+    // Update the emulator speed when the user selects a new speed option.
+    speedSelect.onchange = function () {
+        emulator.instructionsPerSecond = parseInt(speedSelect.options[speedSelect.selectedIndex].value);
+        // If the emulator is currently running, restart it to
+        // put the new speed into effect.
+        if (emulator.isRunning()) {
+            emulator.startEmulator();
+        }
+    };
+
     updatePlayButtons();
 };
 
