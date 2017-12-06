@@ -1,3 +1,4 @@
+var FONT_MEMORY_OFFSET = 16;
 class Chip8Machine {
     constructor(screenSize) {
         this.memory = new Uint8Array(4096); // Main memory
@@ -11,7 +12,7 @@ class Chip8Machine {
         this.screen = new Uint8Array(screenSize);
         // Add the chip font to the beginning of memory.
         for (var i = 0; i < digits.length; i++) {
-            this.loadDataToOffset(digits[i], i * 5);
+            this.loadDataToOffset(digits[i], FONT_MEMORY_OFFSET + i * 5);
         }
     }
 
