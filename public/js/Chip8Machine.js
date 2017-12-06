@@ -19,6 +19,7 @@ class Chip8Machine {
     loadGame(data) {
         // Write the loaded game to memory starting at 0x200.
         this.loadDataToOffset(data, 512);
+        this.PC = 512;
     }
 
     loadDataToOffset(data, offset) {
