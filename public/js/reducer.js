@@ -259,8 +259,9 @@ const reducerModule = {
 
     loadProgram: (state = defaultState, program) => {
         const memory = state.memory.slice();
+        const reserved = 0x200;
         for (let i = 0; i < program.length; i++) {
-            memory[i] = program[i];
+            memory[reserved + i] = program[i];
         }
         return Object.assign({}, state, { memory });
     },
