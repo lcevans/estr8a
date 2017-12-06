@@ -34,7 +34,7 @@ var initializeMemoryDisplay = (machine) => {
         memoryDiv.append(line);
     }
     displayedMemory = [...memory];
-    highlightedAddress = machine.PC;
+    highlightedAddress = machine.state.programCounter;
     document.getElementsByClassName('js-toggleMemory')[0].onclick = () => {
         memoryDiv.style.display = (memoryDiv.style.display == 'inline-block') ? 'none' : 'inline-block';
     }
