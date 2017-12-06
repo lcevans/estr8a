@@ -308,7 +308,7 @@ const reducerModule = {
             var byteToDraw = memory[I + i];
             var xBitPos = Vx;
             var yBitPos = Vy + i;
-            var screenBitPosition = xBitPos * 8 + yBitPos * SCREEN_WIDTH;
+            var screenBitPosition = xBitPos + yBitPos * SCREEN_WIDTH;
             var screenPositionI = screenBitPosition >> 3;
             // ByteToDraw will be drawn with
             var rightChunkSize = screenBitPosition % 8;
@@ -320,7 +320,7 @@ const reducerModule = {
             screen[screenPositionI] = screen[screenPositionI] ^ leftMostPart;
 
             if (rightChunkSize > 0) {
-                var rightMostPart = byteToDraw & (1 >> rightSize);
+                var rightMostPart = byteToDraw & (1 >> rightChunkSize);
                 if (colision == false && screen[screenPositionI + 1] & rightMostPart) {
                     colision = true;
                 }
