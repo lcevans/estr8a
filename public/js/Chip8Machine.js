@@ -362,7 +362,7 @@ class Chip8Machine {
                 this.I += this.V[reg];
                 break;
             case 0x29:
-                this.I = FONT_MEMORY_OFFSET + reg * 5;
+                this.I = FONT_MEMORY_OFFSET + this.V[reg] * 5;
                 break;
             case 0x33:
                 break;
