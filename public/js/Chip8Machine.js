@@ -10,6 +10,7 @@ class Chip8Machine {
         this.DT = 0;   // Delay timer
         this.ST = 0;   // Sound timer
         this.screen = new Uint8Array(screenSize);
+        this.hold = false;  // Indicate if we should advance to the next instruction
 
         this.lookupTable = {
             0x0: this.SYS,
@@ -60,8 +61,10 @@ class Chip8Machine {
 
         this.executeInst();
 
-        // Alwayd advance PC, and take that into account in the couple of instructions that do not need that
-        this.PC += 2;
+        if (!this.hold) {
+            // Advance PC, and take that into account in the couple of instructions that do not need that
+            this.PC += 2;
+        }
     }
 
     executeInst() {
@@ -344,7 +347,14 @@ class Chip8Machine {
                 this.V[reg] = this.DT;
                 break;
             case 0xA:
-                break;
+                // Wait for a key press, store the value of the key in Vx.
+                for (let i = 0; i <= 15; i++)
+                    if (isChipKeyDown(i)) {
+                        this.V[reg] = i;
+                        this.hold = false;
+                    }
+                // Indicate the machine that it must not advance to the next instruction
+                this.hold = true;
             case 0x15:
                 this.DT = this.V[reg];
                 break;
@@ -358,15 +368,24 @@ class Chip8Machine {
                 this.I = FONT_MEMORY_OFFSET + this.V[reg] * 5;
                 break;
             case 0x33:
+                // Store BCD representation of Vx in memory locations I, I+1, and I+2
+                let val = this.V[reg].toString();
+                for (let i = 0; i < 3; i++) {
+                    this.memory[this.I + i] = val[i];
+                }
                 break;
             case 0x55:
                 // Store registers V0 through Vx in memory starting at location I
-                for (let i = 0; i <= reg; i++)
-                    this.memory[this.I + i] = this.V[i];
-            case 0x55:
+                for (let i = 0; i <= reg; i++) {
+                    this.memory[this.I] = this.V[i];
+                    this.I += 1;
+                }
+            case 0x65:
                 // Read registers V0 through Vx from memory starting at location I
-                for (let i = 0; i <= reg; i++)
-                    this.V[i] = this.memory[this.I + i];
+                for (let i = 0; i <= reg; i++) {
+                    this.V[i] = this.memory[this.I];
+                    this.I += 1;
+                }
                 break;
         }
     }
