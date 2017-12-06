@@ -9,12 +9,20 @@ class Chip8Machine {
         this.DT = 0;   // Delay timer
         this.ST = 0;   // Sound timer
         this.screen = new Uint8Array(screenSize);
+        // Add the chip font to the beginning of memory.
+        for (var i = 0; i < digits.length; i++) {
+            this.loadDataToOffset(digits[i], i * 5);
+        }
     }
 
     loadGame(data) {
+        this.loadDataToOffset(data, 512);
+    }
+
+    loadDataToOffset(data, offset) {
         for (var i = 0; i < data.length; i++) {
             // Write the loaded game to memory starting at 0x200.
-            this.memory[512+i] = data[i];
+            this.memory[offset + i] = data[i];
         }
     }
 
