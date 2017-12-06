@@ -24,7 +24,8 @@ const reducerModule = {
                 switch(instruction) {
                     // CLS
                     case 0x00e0:
-                        return reducerModule.initializeScreen(state, state.screenSize);
+                        return Object.assign(reducerModule.initializeScreen(state, state.screenSize),
+                                             { programCounter: state.programCounter + 2 });
                 }
             }
 
