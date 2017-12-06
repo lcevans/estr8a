@@ -24,7 +24,7 @@ const reducerModule = {
                 switch(instruction) {
                     // CLS
                     case 0x00e0:
-                        return Object.assign(reducerModule.initializeScreen(state, state.screenSize),
+                        return Object.assign({}, reducerModule.initializeScreen(state, state.screenSize),
                                              { programCounter: state.programCounter + 2 });
                 }
             }
@@ -32,7 +32,7 @@ const reducerModule = {
             // JP addr
             case 0x1: {
                 const addr = instruction & 0x0fff;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: addr
                 });
             }
@@ -43,7 +43,7 @@ const reducerModule = {
                 const stack = state.stack;
                 stack[state.stackPointer] = state.programCounter;
                 // FIXME throw a horrible exception for stack overflow
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     stack,
                     stackPointer: state.stackPointer + 0x1,
                     programCounter: addr,
@@ -54,7 +54,7 @@ const reducerModule = {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
                 const increment = value === state.register[x] ? 4 : 2;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -64,7 +64,7 @@ const reducerModule = {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
                 const increment = value !== state.register[x] ? 4 : 2;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -74,7 +74,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const increment = state.register[x] === state.register[y] ? 4 : 2;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -85,7 +85,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const memory = state.memory;
                 memory[x] = value;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
                     memory,
                 });
@@ -97,7 +97,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const register = state.register;
                 register[x] += value;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
                     register,
                 });
@@ -186,7 +186,7 @@ const reducerModule = {
 
                 }
 
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
                     register,
                 });
@@ -198,7 +198,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const increment = state.register[x] !== state.register[y] ? 4 : 2;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -206,7 +206,7 @@ const reducerModule = {
             // LD I, addr
             case 0xa: {
                 const addr = instruction & 0x0fff;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     iRegister: addr,
                     programCounter: state.programCounter + 0x2,
                 });
@@ -215,7 +215,7 @@ const reducerModule = {
             // LD I, addr
             case 0xb: {
                 const addr = instruction & 0x0fff;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     programCounter: addr + state.register[0x0],
                 });
             }
@@ -227,7 +227,7 @@ const reducerModule = {
                 const rand = Math.floor(0x100 * Math.random());
                 const register = state.register;
                 register[x] = rand & value;
-                return Object.assign(state, {
+                return Object.assign({}, state, {
                     register,
                     programCounter: state.programCounter + 0x2,
                 });
@@ -251,7 +251,7 @@ const reducerModule = {
         for (let i = 0; i < program.length; i++) {
             memory[i] = program[i];
         }
-        return Object.assign(state, { memory });
+        return Object.assign({}, state, { memory });
     },
 
     nextInstruction: (state = defaultState) => {
@@ -261,6 +261,6 @@ const reducerModule = {
     },
 
     initializeScreen: (state, screenSize) => {
-        return Object.assign(state, { screen: new Uint8Array(screenSize), screenSize: screenSize });
+        return Object.assign({}, state, { screen: new Uint8Array(screenSize), screenSize: screenSize });
     }
 }
