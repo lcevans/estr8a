@@ -17,12 +17,12 @@ class Chip8Machine {
     }
 
     loadGame(data) {
+        // Write the loaded game to memory starting at 0x200.
         this.loadDataToOffset(data, 512);
     }
 
     loadDataToOffset(data, offset) {
         for (var i = 0; i < data.length; i++) {
-            // Write the loaded game to memory starting at 0x200.
             this.memory[offset + i] = data[i];
         }
     }
