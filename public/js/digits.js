@@ -20,7 +20,16 @@ var stringToChipFont = (string) => {
         bytes[row] = value << 4;
     }
     return bytes;
-}
+};
+
+var addChipFontsAtAddress = (memory, address) => {
+    for (var i = 0; i < digits.length; i++) {
+        for (var j = 0; j < 5; j++) {
+            memory[address + i * 5 + j] = digits[i][j];
+        }
+    }
+    return memory;
+};
 
 // `*` indicate 1 bits, and spaces are 0 bits. Each row can only have 4 bits.
 var digits = [`

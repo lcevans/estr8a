@@ -1,9 +1,11 @@
 // TODO: Improve the understandability of the mask and shifts.
 // TODO: It's weird to increment the program counter by 2 every time.
 
+// Chip font will be loaded into memory at this address.
+const FONT_ADDRESS = 0x0;
 
 const defaultState = {
-    memory: new Uint8Array(0x1000),
+    memory: addChipFontsAtAddress(new Uint8Array(0x1000), FONT_ADDRESS),
     register: new Uint8Array(0x10),
     stack: new Uint16Array(0x10),
     programCounter: 0x200,
