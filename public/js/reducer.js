@@ -20,15 +20,21 @@ const defaultState = {
     keyboard: new Uint8Array(0x10),
 };
 
+
+const decreaseTimers = (state, overrides) => {
+    return Object.assign({}, state, {
+        dtRegister: state.dtRegister > 0 ? state.dtRegister-- : 0,
+        stRegister: state.stRegister > 0 ? state.stRegister-- : 0,
+    }, overrides);
+}
+
+
 const reducerModule = {
     step: (state = defaultState, instruction) => {
         if (typeof(instruction) === 'undefined') {
             console.warn('Using default state');
             return state;
         }
-        // Decrement DT and ST if positive
-        if(state.stRegister > 0) state.stRegister--;
-        if(state.dtRegister > 0) state.dtRegister--;
 
         const displayInstruction = '0x' + instruction.toString(16)
         const opCode = (instruction & 0xF000) >> 12;
@@ -36,12 +42,14 @@ const reducerModule = {
             case 0x0: {
                 switch(instruction) {
                     // CLS
-                    case 0x00e0:
-                        return Object.assign(
-                            {},
-                            reducerModule.initializeScreen(state, state.screenSize),
-                            { programCounter: state.programCounter + 2 }
+                    case 0x00e0: {
+                        const newState = reducerModule.initializeScreen(
+                            state, state.screenSize
                         );
+                        return decreaseTimers(newState, {
+                            programCounter: state.programCounter + 2
+                        });
+                    }
                 }
                 throw `Unrecognized instruction ${displayInstruction}`;
             }
@@ -49,7 +57,7 @@ const reducerModule = {
             // JP addr
             case 0x1: {
                 const addr = instruction & 0x0fff;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: addr
                 });
             }
@@ -60,7 +68,7 @@ const reducerModule = {
                 const stack = state.stack.slice();
                 stack[state.stackPointer] = state.programCounter;
                 // FIXME throw a horrible exception for stack overflow
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     stack,
                     stackPointer: state.stackPointer + 0x1,
                     programCounter: addr,
@@ -72,7 +80,7 @@ const reducerModule = {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
                 const increment = value === state.register[x] ? 4 : 2;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -82,7 +90,7 @@ const reducerModule = {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
                 const increment = value !== state.register[x] ? 4 : 2;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -92,7 +100,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const increment = state.register[x] === state.register[y] ? 4 : 2;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -103,7 +111,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const memory = state.memory.slice();
                 memory[x] = value;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: state.programCounter + 0x2,
                     memory,
                 });
@@ -115,7 +123,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const register = state.register.slice();
                 register[x] += value;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: state.programCounter + 0x2,
                     register,
                 });
@@ -217,7 +225,7 @@ const reducerModule = {
 
                 }
 
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: state.programCounter + 0x2,
                     register,
                 });
@@ -229,7 +237,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const increment = state.register[x] !== state.register[y] ? 4 : 2;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -237,7 +245,7 @@ const reducerModule = {
             // LD I, addr
             case 0xa: {
                 const addr = instruction & 0x0fff;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     iRegister: addr,
                     programCounter: state.programCounter + 0x2,
                 });
@@ -246,7 +254,7 @@ const reducerModule = {
             // LD I, addr
             case 0xb: {
                 const addr = instruction & 0x0fff;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     programCounter: addr + state.register[0x0],
                 });
             }
@@ -258,7 +266,7 @@ const reducerModule = {
                 const rand = Math.floor(0x100 * Math.random());
                 const register = state.register.slice();
                 register[x] = rand & value;
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     register,
                     programCounter: state.programCounter + 0x2,
                 });
@@ -293,7 +301,7 @@ const reducerModule = {
                         {
                             if(state.keyboard[i]) {
                                 register[x] = i;
-                                return Object.assign({}, state, {
+                                return decreaseTimers(state, {
                                     register,
                                     programCounter: state.programCounter + 2,
                                 });
@@ -301,11 +309,11 @@ const reducerModule = {
                             }
                         }
                         // No key is down so do nothing (PC unchanged so we will call this command again)
-                        return state;
+                        return decreaseTimers(state, {});
                     }
                     // LD DT, Vx
                     case 0x15: {
-                        return Object.assign({}, state, {
+                        return decreaseTimers(state, {
                             dtRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
@@ -313,14 +321,14 @@ const reducerModule = {
                     // LD ST, Vx
                     case 0x18: {
                         state.stRegister = state.register[x];
-                        return Object.assign({}, state, {
+                        return decreaseTimers(state, {
                             stRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
                     }
                     // ADD I, Vx
                     case 0x1e: {
-                        return Object.assign({}, state, {
+                        return decreaseTimers(state, {
                             iRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
@@ -329,7 +337,7 @@ const reducerModule = {
                     // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
                     case 0x29: {
                         // NOTE: This assumes the "chip-font" sprites are loaded here in memory
-                        return Object.assign({}, state, {
+                        return decreaseTimers(state, {
                             iRegister: 5 * x,
                             programCounter: state.programCounter + 2,
                         });
@@ -370,7 +378,7 @@ const reducerModule = {
                         throw `Unrecognized instruction ${displayInstruction}`;
                 }
 
-                return Object.assign({}, state, {
+                return decreaseTimers(state, {
                     memory,
                     register,
                     programCounter: state.programCounter + 2,
@@ -382,6 +390,7 @@ const reducerModule = {
                 throw `Unrecognized instruction ${displayInstruction}`;
 
         }
+        // shouldn't get to this stage either
         return state;
     },
 
