@@ -9,7 +9,8 @@ const defaultState = {
     programCounter: 0x200,
     stackPointer: 0x0,
     iRegister: 0x0,
-    screen: new Uint8Array(64*32/8), /* dunno yet */
+    screen: null,
+    screenSize: 0,
     // the keyboard could be updated separately
     // or else read from the keyboard itself
     keyboard: new Uint8Array(0x10),
@@ -23,10 +24,7 @@ const reducerModule = {
                 switch(instruction) {
                     // CLS
                     case 0x00e0:
-                        return Object.assign(state, {
-                            screen: null,
-                            programCounter: state.programCounter + 0x2,
-                        });
+                        return reducerModule.initializeScreen(state, state.screenSize);
                 }
             }
 
@@ -240,6 +238,7 @@ const reducerModule = {
                 const y = (instruction & 0x00f0) >> 4;
                 const n = (instruction & 0x000f) >> 0;
                 // TODO Biggest ever
+
             }
 
         }
@@ -258,5 +257,9 @@ const reducerModule = {
         const firstHalf = state.memory[state.programCounter] << 8;
         const secondHalf = state.memory[state.programCounter + 1];
         return firstHalf | secondHalf;
+    },
+
+    initializeScreen: (state, screenSize) => {
+        return Object.assign(state, { screen: new Uint8Array(screenSize), screenSize: screenSize });
     }
 }

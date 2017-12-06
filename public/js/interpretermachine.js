@@ -1,6 +1,6 @@
 class InterpreterMachine {
     constructor(screenSize) {
-        this.state = reducerModule.step();
+        this.state = reducerModule.initializeScreen(reducerModule.step(), screenSize);
         this.screen = this.state.screen;
         this.memory = this.state.memory;
     }
