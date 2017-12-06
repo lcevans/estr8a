@@ -13,7 +13,7 @@ class Chip8Machine {
 
         this.lookupTable = {
             0x0: this.SYS,
-            0x1: this.JP,
+            0x1: this.JP1,
             0x2: this.CALL,
             0x3: this.SE3,
             0x4: this.SNE4,
@@ -23,7 +23,7 @@ class Chip8Machine {
             0x8: this.ALU,
             0x9: this.SNE,
             0xA: this.LD,
-            0xB: this.JP,
+            0xB: this.JPB,
             0xC: this.RND,
             0xD: this.DRW,
             0xE: this.KBD,
@@ -140,22 +140,22 @@ class Chip8Machine {
         }
     }
 
+    ///////////////////////////
+    // 1nnn - JP addr        //
+    // Jump to location nnn. //
+    ///////////////////////////
+    JP1(inst) {
+        let addr = this.extractPayload(inst);
+        this.PC = addr - 2;
+    }
+
     /////////////////////////
-    // 1nnn - JP addr
-    // Jump to location nnn.
     // Bnnn - JP V0 + addr
     // Jump to location nnn + value of V0.
     ///////////////////////////
-    JP(inst) {
+    JPB(inst) {
         let addr = this.extractPayload(inst);
-        switch (this.extractPrefix(inst)) {
-            case 0x1: // Jump to address nnn
-                this.PC = addr - 2;
-                break;
-            case 0xB: // Jump to address nnn + V0
-                this.PC = this.V[0] + addr - 2;
-                break;
-        }
+        this.PC = this.V[0] + addr - 2;
     }
 
     /////////////////////////////
