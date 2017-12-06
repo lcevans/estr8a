@@ -244,5 +244,19 @@ const reducerModule = {
 
         }
         return state;
+    },
+
+    loadProgram: (state = defaultState, program) => {
+        const memory = state.memory;
+        for (let i = 0; i < program.length; i++) {
+            memory[i] = program[i];
+        }
+        return Object.assign(state, { memory });
+    },
+
+    nextInstruction: (state = defaultState) => {
+        const firstHalf = state.memory[state.programCounter] << 8;
+        const secondHalf = state.memory[state.programCounter + 1];
+        return firstHalf | secondHalf;
     }
 }

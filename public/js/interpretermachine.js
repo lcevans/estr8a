@@ -4,13 +4,9 @@ class InterpreterMachine {
         this.screen = this.state.screen;
         this.memory = this.state.memory;
     }
-    fetchInstruction() {
-        let instruction = this.memory[this.PC] << 8 | this.memory[this.PC + 1];
-        return instruction;
-    }
     tick() {
          // Fetch Opcode
-         const instruction = this.fetchInstruction();
+         const instruction = reducerModule.fetchInstruction(this.state);
          this.state = reducerModule.step(this.state, instruction);
     }
     loadGame(data) {
