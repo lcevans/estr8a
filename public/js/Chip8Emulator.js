@@ -9,12 +9,16 @@ class Chip8Emulator {
         this.machine = MakeMachine(screenSize);
         this.drawFlag = false;
         this.mainLoopId = null;
+        // This is named to indicate whether the emulator should play if
+        // a game is loaded.
+        this.shouldPlay = true;
 
         // This is dummy code to test that drawing the screen works roughly how we are expecting:
         for (var i = 0; i < 16; i++) {
             this.drawChipCharacterToScreen(digits[i], i % 8, Math.floor(i / 8) * 7);
         }
         this.drawFlag = true;
+        window.requestAnimationFrame(() => this.renderLoop());
     }
 
     loadGame(gameName) {
@@ -34,7 +38,9 @@ class Chip8Emulator {
         }).then(gameData => {
             console.log("Loading", gameData.length, "bytes!");
             this.machine.loadGame(gameData);
-            this.startEmulator();
+            if (this.shouldPlay) {
+                this.startEmulator();
+            }
         });
     }
 
@@ -46,13 +52,23 @@ class Chip8Emulator {
     }
 
     startEmulator() {
+        this.shouldPlay = true;
         // Clear the existing emulation loop, if for some reason this is called while emulation
         // is already running.
         if (this.mainLoopId) {
             clearInterval(this.mainLoopId);
         }
         this.mainLoopId = setInterval(() => this.emulationLoop(), TICK_MS);
-        window.requestAnimationFrame(() => this.renderLoop());
+    }
+
+    pauseEmulator() {
+        this.shouldPlay = false;
+        if (this.mainLoopId) {
+            clearInterval(this.mainLoopId);
+            // We read this.mainLoopId to determine if
+            // the emulator is currently playing.
+            this.mainLoopId = null;
+        }
     }
 
     emulationLoop() {
@@ -67,10 +83,7 @@ class Chip8Emulator {
         // This will update the display of which keys are being pressed.
         updateKeyboard();
         updateMemoryDisplay(this.machine);
-        // Assume that the emulator is still running as long `this.mainLoopId` is set.
-        if (this.mainLoopId) {
-            window.requestAnimationFrame(() => this.renderLoop());
-        }
+        window.requestAnimationFrame(() => this.renderLoop());
     }
 
     drawGraphics() {

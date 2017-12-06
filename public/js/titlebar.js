@@ -22,4 +22,23 @@ var initializeTitleBar = function () {
         emulator.loadGame(game_to_load);
         document.getElementById('current-game').innerHTML=game_to_load;
     };
-}
+
+    document.getElementById('play-button').onclick = function() {
+        emulator.startEmulator();
+        updatePlayButtons();
+    };
+    document.getElementById('pause-button').onclick = function() {
+        emulator.pauseEmulator();
+        updatePlayButtons();
+    };
+    document.getElementById('step-button').onclick = function() {
+        emulator.emulationLoop();
+    };
+    updatePlayButtons();
+};
+
+var updatePlayButtons = () => {
+    document.getElementById('play-button').style.display = emulator.shouldPlay ? 'none' : 'inline-block';
+    document.getElementById('pause-button').style.display = !emulator.shouldPlay ? 'none' : 'inline-block';
+    document.getElementById('step-button').style.display = emulator.shouldPlay ? 'none' : 'inline-block';
+};

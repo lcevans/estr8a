@@ -1,3 +1,4 @@
+var FONT_MEMORY_OFFSET = 16;
 class Chip8Machine {
     constructor(screenSize) {
         this.memory = new Uint8Array(4096); // Main memory
@@ -20,20 +21,28 @@ class Chip8Machine {
             0x6: this.LD,
             0x7: this.INC,
             0x8: this.ALU,
-            0x9: this.ALU,
-            0xA: this.ALU,
-            0xB: this.ALU,
-            0xC: this.ALU,
-            0xD: this.ALU,
-            0xE: this.ALU,
-            0xF: this.ALU,
+            0x9: this.SNE,
+            0xA: this.LD,
+            0xB: this.JP,
+            0xC: this.RND,
+            0xD: this.DRW,
+            0xE: this.SKP,
+            0xF: () => undefined,
         };
+        // Add the chip font to the beginning of memory.
+        for (var i = 0; i < digits.length; i++) {
+            this.loadDataToOffset(digits[i], FONT_MEMORY_OFFSET + i * 5);
+        }
     }
 
     loadGame(data) {
+        // Write the loaded game to memory starting at 0x200.
+        this.loadDataToOffset(data, 512);
+    }
+
+    loadDataToOffset(data, offset) {
         for (var i = 0; i < data.length; i++) {
-            // Write the loaded game to memory starting at 0x200.
-            this.memory[512+i] = data[i];
+            this.memory[offset + i] = data[i];
         }
     }
 
@@ -130,9 +139,11 @@ class Chip8Machine {
         }
     }
 
-    ///////////////////////////
-    // 1nnn - JP addr        //
-    // Jump to location nnn. //
+    /////////////////////////
+    // 1nnn - JP addr
+    // Jump to location nnn.
+    // Bnnn - JP V0 + addr
+    // Jump to location nnn + value of V0.
     ///////////////////////////
     JP(inst) {
         let addr = this.extractPayload(inst);
@@ -140,7 +151,7 @@ class Chip8Machine {
             case 0x1: // Jump to address nnn
                 this.PC = addr - 2;
                 break;
-            case 0xB: // Jump to address
+            case 0xB: // Jump to address nnn + V0
                 this.PC = this.V[0] + addr - 2;
                 break;
         }
@@ -203,10 +214,12 @@ class Chip8Machine {
     ////////////////////////
     // 6xkk - LD Vx, byte //
     // Set Vx = kk.       //
+    // Annn - LD I, byte  //
+    // Set I = nnn        //
     ////////////////////////
     LD(inst) {
         let [reg, num] = this.extractReg(inst);
-        switch(inst >> 12) {
+        switch(this.extractPrefix(inst)) {
             case 0x6: // Store value on V registers
                 this.V[reg] = num;
                 break;
@@ -320,6 +333,13 @@ class Chip8Machine {
     // Dxyn - DRW Vx, Vy, nibble
     // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
     DRW(inst) {
+    }
+
+    // Ex9E - SKP Vx
+    // Skip next instruction if key with the value of Vx is pressed.
+    // ExA1 - SKNP Vx
+    // Skip next instruction if key with the value of Vx is not pressed.
+    SKP(inst) {
     }
 }
 
