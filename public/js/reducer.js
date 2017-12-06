@@ -9,7 +9,7 @@ const defaultState = {
     programCounter: 0x200,
     stackPointer: 0x0,
     iRegister: 0x0,
-    screen: null /* dunno yet */,
+    screen: new Uint8Array(64*32/8), /* dunno yet */
     // the keyboard could be updated separately
     // or else read from the keyboard itself
     keyboard: new Uint8Array(0x10),

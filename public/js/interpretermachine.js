@@ -1,6 +1,8 @@
 class InterpreterMachine {
     constructor(screenSize) {
         this.state = reducerModule.step();
+        this.screen = this.state.screen;
+        this.memory = this.state.memory;
     }
     fetchInstruction() {
         let instruction = this.memory[this.PC] << 8 | this.memory[this.PC + 1];
@@ -13,6 +15,8 @@ class InterpreterMachine {
     }
     loadGame(data) {
         this.state = reducerModule.loadProgram(this.state, data);
+        this.screen = this.state.screen;
+        this.memory = this.state.memory;
     }
 }
 
