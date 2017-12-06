@@ -320,7 +320,7 @@ const reducerModule = {
             screen[screenPositionI] = screen[screenPositionI] ^ leftMostPart;
 
             if (rightChunkSize > 0) {
-                var rightMostPart = byteToDraw & (1 >> rightChunkSize);
+                var rightMostPart = byteToDraw << (8-rightChunkSize);
                 if (colision == false && screen[screenPositionI + 1] & rightMostPart) {
                     colision = true;
                 }
