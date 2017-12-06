@@ -26,7 +26,7 @@ class Chip8Machine {
             0xB: this.JP,
             0xC: this.RND,
             0xD: this.DRW,
-            0xE: this.SKP,
+            0xE: this.KBD,
             0xF: () => undefined,
         };
         // Add the chip font to the beginning of memory.
@@ -38,6 +38,7 @@ class Chip8Machine {
     loadGame(data) {
         // Write the loaded game to memory starting at 0x200.
         this.loadDataToOffset(data, 512);
+        this.PC = 512;
     }
 
     loadDataToOffset(data, offset) {
@@ -133,7 +134,7 @@ class Chip8Machine {
                 this.SP--;
             }
             else {
-                console.log("Registers:", this.regs);
+                console.log("Registers:", this);
                 throw "Error! Attempting to return with an empty stack!";
             }
         }
@@ -163,8 +164,8 @@ class Chip8Machine {
     /////////////////////////////
     CALL(inst) {
         var addr = this.extractPayload(inst);
-        if (this.sp >= 15) {
-            console.log("Registers:", this.regs);
+        if (this.SP >= 15) {
+            console.log("Registers:", this);
             throw "Stack overflow!";
         }
         this.SP++;
@@ -203,7 +204,7 @@ class Chip8Machine {
     SE5(inst) {
         var [x,y,num] = this.extractRegs(inst);
         if (num != 0) {
-            consile.log(this.regs);
+            console.log(this);
             throw "Invalid instruction read!";
         }
         if (this.V[x] == this.V[y]) {
@@ -295,7 +296,7 @@ class Chip8Machine {
             break;
         case 6:
             this.V[15] = this.V[x] & 0x0001;
-            this.V[x] = this.V[x] >>> 1;
+            this.V[x] = this.V[x] >>> 1; // TODO: Bug? Shift before assignment?
             break;
         case 7:
             var diff = this.V[y] - this.V[x];
@@ -311,39 +312,36 @@ class Chip8Machine {
             this.V[x] = this.V[x] << 1;
             break;
         default:
-            console.log("Registers:", this.regs);
+            console.log("Registers:", this);
             throw "Unrecognized instruction!";
             break;
         }
     }
 
-    // 9xy0 - SNE Vx, Vy
+    ////////////////////////////////////////
+    // 9xy0 - SNE Vx, Vy                  //
+    // Skip next instruction if Vx != Vy. //
+    ////////////////////////////////////////
     SNE(inst) {
         let [x, y, num] = this.extractRegs(inst);
         if (this.V[x] !== this.V[y])
             this.PC += 2;
     }
 
-    // Cxkk - RND Vx, byte
+    //////////////////////////////////
+    // Cxkk - RND Vx, byte          //
+    // Set Vx = random byte AND kk. //
+    //////////////////////////////////
     RND(inst) {
         let [reg, num] = this.extractReg(inst);
         this.V[reg] = this.getRandomInt(0, 255) & num;
     }
 
-    // Dxyn - DRW Vx, Vy, nibble
-    // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Dxyn - DRW Vx, Vy, nibble                                                            //
+    // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision. //
+    //////////////////////////////////////////////////////////////////////////////////////////
     DRW(inst) {
-    }
-
-    // Ex9E - SKP Vx
-    // Skip next instruction if key with the value of Vx is pressed.
-    // ExA1 - SKNP Vx
-    // Skip next instruction if key with the value of Vx is not pressed.
-    SKP(inst) {
-        let [reg, num] = this.extractReg(inst);
-        let keyPressed = isChipKeyDown(this.V[reg]);
-        if ((num === 0x9E && keyPressed) || num === 0xA1 && !keyPressed)
-            this.PC += 2;
     }
 
     FN(inst) {
@@ -379,6 +377,40 @@ class Chip8Machine {
                 break;
         }
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // Dxyn - DRW Vx, Vy, nibble                                                            //
+    // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision. //
+    //////////////////////////////////////////////////////////////////////////////////////////
+    DRW(inst) {
+        var [x, y, n] = this.extractRegs(inst);
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    // Ex9E - SKP Vx                                                     //
+    // Skip next instruction if key with the value of Vx is pressed.     //
+    // ExA1 - SKNP Vx                                                    //
+    // Skip next instruction if key with the value of Vx is not pressed. //
+    ///////////////////////////////////////////////////////////////////////
+    KBD(inst) {
+        var [x, num] = this.extractReg(inst);
+        if (num == 0x9E) {
+            if (isChipKeyDown(this.V[x])) {
+                this.PC += 2;
+            }
+        }
+        else if (num == 0xA1) {
+            if (!isChipKeyDown(this.V[x])) {
+                this.PC += 2;
+            }
+        }
+        else {
+            console.log(this);
+            throw "Unrecognized instruction";
+        }
+    }
+
+
 }
 
 var makeMachine = function(screenSize) {

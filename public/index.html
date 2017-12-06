@@ -11,6 +11,12 @@
     <button id="play-button">Play</button>
     <button id="pause-button">Pause</button>
     <button id="step-button">Step</button>
+    <select id="speed-select">
+        <option selected value="60">60Hz</option>
+        <option value="10">10Hz</option>
+        <option value="5">5Hz</option>
+        <option value="1">1Hz</option>
+    </select>
     <div id="current-game">No Game Loaded</div>
   </div>
   <div class="js-sound">
@@ -37,7 +43,8 @@
 <script src="/js/titlebar.js"></script>
 <script src="/js/sound.js"></script>
 <script src="/js/keyboard.js"></script>
-<script src="/js/Chip8Machine.js"></script>
+<script src="/js/reducer.js"></script>
+<script src="/js/interpretermachine.js"></script>
 <script src="/js/Chip8Emulator.js"></script>
 <script src="/js/digits.js"></script>
 <script src="/js/memory.js"></script>
