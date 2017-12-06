@@ -278,7 +278,7 @@ const reducerModule = {
                 const y = (instruction & 0x00f0) >> 4;
                 const n = (instruction & 0x000f) >> 0;
                 // TODO Biggest ever
-                break; // Till we return
+                return Object.assign({}, reducerModule.draw(state, state.register[x], state.register[y], n), { programCounter: state.programCounter + 0x2 });
             }
 
             // Misc comands (mostly LD)
@@ -394,14 +394,14 @@ const reducerModule = {
         return state;
     },
 
-    loadProgram: (program) => {
+    loadProgram: (program, screenSize) => {
         const state = Object.assign({}, defaultState);
         const memory = state.memory.slice();
         const reserved = 0x200;
         for (let i = 0; i < program.length; i++) {
             memory[reserved + i] = program[i];
         }
-        return Object.assign({}, state, { memory });
+        return Object.assign({}, reducerModule.initializeScreen(state, screenSize), { memory });
     },
 
     nextInstruction: (state = defaultState) => {
@@ -423,5 +423,47 @@ const reducerModule = {
             screen: new Uint8Array(screenSize),
             screenSize: screenSize
         });
+    },
+
+    draw: (state, Vx, Vy, n) => {
+        var screen = new Uint8Array(state.screen);
+        var memory = state.memory;
+        var I = state.iRegister;
+        var register = new Uint8Array(state.register);
+
+        var colision = false;
+        var xBitPos = Vx % (SCREEN_WIDTH * 8);
+        for (i=0; i<n; i++) {
+            var byteToDraw = memory[I + i];
+            var yBitPos = (Vy + i) % SCREEN_HEIGHT;
+            var screenBitPosition = xBitPos + yBitPos * SCREEN_WIDTH;
+            var screenPositionI = screenBitPosition >> 3;
+            // ByteToDraw will be drawn in two parts, a left part and a right part
+            var rightChunkSize = screenBitPosition % 8;
+            var leftMostPart = byteToDraw >> rightChunkSize;
+
+            if (colision == false && screen[screenPositionI] & leftMostPart) {
+                colision = true;
+            }
+            screen[screenPositionI] = screen[screenPositionI] ^ leftMostPart;
+
+            // Just skip this if the sprite is positioned in perfect alignment
+            // with memory
+            if (rightChunkSize > 0) {
+                var rightMostPart = byteToDraw << (8-rightChunkSize);
+                var wrapCoord = screenPositionI + 1;
+                // If this wrapped across the screen, wrapCoord % 8 will be 0,
+                // and we need to subtract 8 to move back to the beginning of the
+                // initial row. The number 8 is screenWidth(64) / pixels per byte (8).
+                if (wrapCoord % 8 === 0) wrapCoord -= 8;
+                if (colision == false && screen[wrapCoord] & rightMostPart) {
+                    colision = true;
+                }
+                screen[wrapCoord] = screen[wrapCoord] ^ rightMostPart;
+            }
+
+        }
+        register[0xF] = colision ? 1 : 0;
+        return Object.assign({}, state, {screen: screen, register: register});
     }
 }
