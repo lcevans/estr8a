@@ -15,7 +15,7 @@ class Chip8Emulator {
 
         // This is dummy code to test that drawing the screen works roughly how we are expecting:
         for (var i = 0; i < 16; i++) {
-            this.drawChipCharacterToScreen(digits[i], i % 8, Math.floor(i / 8) * 7);
+             this.drawChipCharacterToScreen(digits[i], i % 8, Math.floor(i / 8) * 7);
         }
         this.drawFlag = true;
         window.requestAnimationFrame(() => this.renderLoop());
