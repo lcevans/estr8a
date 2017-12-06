@@ -304,13 +304,13 @@ const reducerModule = {
         var register = new Uint8Array(state.register);
 
         var colision = false;
+        var xBitPos = Vx % (SCREEN_WIDTH * 8);
         for (i=0; i<n; i++) {
             var byteToDraw = memory[I + i];
-            var xBitPos = Vx;
-            var yBitPos = Vy + i;
-            var screenBitPosition = xBitPos * 8 + yBitPos * SCREEN_WIDTH;
+            var yBitPos = (Vy + i) % SCREEN_HEIGHT;
+            var screenBitPosition = xBitPos + yBitPos * SCREEN_WIDTH;
             var screenPositionI = screenBitPosition >> 3;
-            // ByteToDraw will be drawn with
+            // ByteToDraw will be drawn in two parts, a left part and a right part
             var rightChunkSize = screenBitPosition % 8;
             var leftMostPart = byteToDraw >> rightChunkSize;
 
@@ -319,8 +319,10 @@ const reducerModule = {
             }
             screen[screenPositionI] = screen[screenPositionI] ^ leftMostPart;
 
+            // Just skip this if the sprite is positioned in perfect alignment
+            // with memory
             if (rightChunkSize > 0) {
-                var rightMostPart = byteToDraw & (1 >> rightSize);
+                var rightMostPart = byteToDraw << (8-rightChunkSize);
                 if (colision == false && screen[screenPositionI + 1] & rightMostPart) {
                     colision = true;
                 }
