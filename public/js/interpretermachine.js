@@ -4,6 +4,7 @@ class InterpreterMachine {
             reducerModule.step(),
             screenSize
         ));
+        this.screenSize = screenSize;
     }
 
     setState(state) {
@@ -16,9 +17,10 @@ class InterpreterMachine {
         // Fetch Opcode
         const instruction = reducerModule.nextInstruction(this.state);
         this.setState(reducerModule.step(this.state, instruction));
+        return instruction >> 12 === 0xD; // HAck to force redraw.
     }
     loadGame(data) {
-        this.setState(reducerModule.loadProgram(data));
+        this.setState(reducerModule.loadProgram(data, this.screenSize));
     }
 }
 
