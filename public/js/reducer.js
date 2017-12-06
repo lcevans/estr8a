@@ -18,16 +18,23 @@ const defaultState = {
 
 const reducerModule = {
     step: (state = defaultState, instruction) => {
+        if (typeof(instruction) === 'undefined') {
+            console.warn('Using default state');
+            return state;
+        }
         const opCode = (instruction & 0xF000) >> 12;
         switch(opCode) {
             case 0x0: {
                 switch(instruction) {
                     // CLS
                     case 0x00e0:
-                        return Object.assign({}, reducerModule.initializeScreen(state, state.screenSize),
-                                             { programCounter: state.programCounter + 2 });
+                        return Object.assign(
+                            {},
+                            reducerModule.initializeScreen(state, state.screenSize),
+                            { programCounter: state.programCounter + 2 }
+                        );
                 }
-                break;
+                throw `Unrecognized instruction ${instruction}`;
             }
 
             // JP addr
@@ -194,6 +201,10 @@ const reducerModule = {
                         register[0xF] = msb;
                         break;
                     }
+
+                    default:
+                        throw `Unrecognized instruction ${instruction}`;
+
 
                 }
 
