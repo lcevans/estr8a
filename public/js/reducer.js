@@ -277,13 +277,12 @@ const reducerModule = {
             case 0xf: {
                 const x = (instruction & 0x0f00) >> 8;
                 const subOpCode = (instruction & 0x00ff);
+                const register = state.register.slice();
+                const memory = state.memory.slice();
                 switch(subOpCode) {
                     // LD Vx, DT
                     case 0x07: {
-                        state.register[x] = state.dtRegister;
-                        return Object.assign({}, state, {
-                            programCounter: state.programCounter + 2,
-                        });
+                        register[x] = state.dtRegister;
                         break;
                     }
                     // LD Vx, K
@@ -292,9 +291,10 @@ const reducerModule = {
                     case 0x0a: {
                         for(var i=1; i<16; i++)
                         {
-                            if(isChipKeyDown(i)) {
-                                state.register[x] = i;
+                            if(state.keyboard[i]) {
+                                register[x] = i;
                                 return Object.assign({}, state, {
+                                    register,
                                     programCounter: state.programCounter + 2,
                                 });
                                 break;
@@ -302,37 +302,35 @@ const reducerModule = {
                         }
                         // No key is down so do nothing (PC unchanged so we will call this command again)
                         return state;
-                        break;
                     }
                     // LD DT, Vx
                     case 0x15: {
-                        state.dtRegister = state.register[x];
                         return Object.assign({}, state, {
+                            dtRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
-                        break;
                     }
                     // LD ST, Vx
                     case 0x18: {
                         state.stRegister = state.register[x];
                         return Object.assign({}, state, {
+                            stRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
-                        break;
                     }
                     // ADD I, Vx
                     case 0x1e: {
-                        state.iRegister += state.register[x];
                         return Object.assign({}, state, {
+                            iRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
-                        break;
                     }
                     // LD F, Vx
                     // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
                     case 0x29: {
-                        state.iRegister = 5 * x; // NOTE: This assumes the "chip-font" sprites are loaded here in memory
+                        // NOTE: This assumes the "chip-font" sprites are loaded here in memory
                         return Object.assign({}, state, {
+                            iRegister: 5 * x,
                             programCounter: state.programCounter + 2,
                         });
                         break;
@@ -349,9 +347,6 @@ const reducerModule = {
                         memory[state.iRegister] = hundreds_digit;
                         memory[state.iRegister + 1] = tens_digit;
                         memory[state.iRegister + 2] = ones_digit;
-                        return Object.assign({}, state, {
-                            programCounter: state.programCounter + 2,
-                        });
                         break;
                     }
                     // LD [I], Vx
@@ -360,25 +355,27 @@ const reducerModule = {
                         for (var i=0; i<x+1; i++) {
                             memory[state.iRegister + i] = state.register[i];
                         }
-                        return Object.assign({}, state, {
-                            programCounter: state.programCounter + 2,
-                        });
                         break;
                     }
                     // LD Vx, [I]
                     // The interpreter reads values from memory starting at location I into registers V0 through Vx.
                     case 0x65: {
                         for (var i=0; i<x+1; i++) {
-                            state.register[i] = memory[state.iRegister + i];
+                            register[i] = state.memory[state.iRegister + i];
                         }
-                        return Object.assign({}, state, {
-                            programCounter: state.programCounter + 2,
-                        });
                         break;
                     }
+
+                    default:
+                        throw `Unrecognized instruction ${displayInstruction}`;
                 }
 
-                break; // Till we return
+                return Object.assign({}, state, {
+                    memory,
+                    register,
+                    programCounter: state.programCounter + 2,
+                });
+
             }
 
             default:
