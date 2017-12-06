@@ -5,7 +5,7 @@
 const defaultState = {
     memory: new Uint8Array(0x1000),
     register: new Uint8Array(0x10),
-    stack: new Uint8Array(0x10),
+    stack: new Uint16Array(0x10),
     programCounter: 0x200,
     stackPointer: 0x0,
     iRegister: 0x0,
