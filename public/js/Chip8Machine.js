@@ -337,13 +337,6 @@ class Chip8Machine {
         this.V[reg] = this.getRandomInt(0, 255) & num;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Dxyn - DRW Vx, Vy, nibble                                                            //
-    // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision. //
-    //////////////////////////////////////////////////////////////////////////////////////////
-    DRW(inst) {
-    }
-
     FN(inst) {
         let [reg, num] = this.extractReg(inst);
         switch(num) {
