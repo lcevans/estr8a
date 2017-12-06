@@ -323,10 +323,15 @@ const reducerModule = {
             // with memory
             if (rightChunkSize > 0) {
                 var rightMostPart = byteToDraw << (8-rightChunkSize);
-                if (colision == false && screen[screenPositionI + 1] & rightMostPart) {
+                var wrapCoord = screenPositionI + 1;
+                // If this wrapped across the screen, wrapCoord % 8 will be 0,
+                // and we need to subtract 8 to move back to the beginning of the
+                // initial row. The number 8 is screenWidth(64) / pixels per byte (8).
+                if (wrapCoord % 8 === 0) wrapCoord -= 8;
+                if (colision == false && screen[wrapCoord] & rightMostPart) {
                     colision = true;
                 }
-                screen[screenPositionI + 1] = screen[screenPositionI + 1] ^ rightMostPart;
+                screen[wrapCoord] = screen[wrapCoord] ^ rightMostPart;
             }
 
         }
