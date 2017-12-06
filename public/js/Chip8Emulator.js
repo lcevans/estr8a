@@ -87,7 +87,7 @@ class Chip8Emulator {
         }
         // This will update the display of which keys are being pressed.
         updateKeyboard();
-        updateMemoryDisplay(this.machine, this.machine.PC);
+        updateMemoryDisplay(this.machine, this.machine.state.programCounter);
         window.requestAnimationFrame(() => this.renderLoop());
     }
 
