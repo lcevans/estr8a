@@ -306,8 +306,8 @@ const reducerModule = {
         var colision = false;
         for (i=0; i<n; i++) {
             var byteToDraw = memory[I + i];
-            var xBitPos = Vx;
-            var yBitPos = Vy + i;
+            var xBitPos = Vx % (SCREEN_WIDTH * 8);
+            var yBitPos = (Vy + i) % SCREEN_HEIGHT;
             var screenBitPosition = xBitPos + yBitPos * SCREEN_WIDTH;
             var screenPositionI = screenBitPosition >> 3;
             // ByteToDraw will be drawn with
