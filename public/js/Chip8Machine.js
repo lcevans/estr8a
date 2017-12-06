@@ -66,7 +66,7 @@ class Chip8Machine {
 
     executeInst() {
         let inst = this.memory[this.PC] << 8 | this.memory[this.PC + 1];
-        this.lookupTable[inst >> 12](inst); // call the instruction function
+        this.lookupTable[this.extractPrefix(inst)](inst); // call the instruction function
     }
 
     // The maximum is inclusive and the minimum is inclusive
