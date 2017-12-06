@@ -1,6 +1,6 @@
 var FONT_MEMORY_OFFSET = 16;
 class Chip8Machine {
-    constructor(screenSize) {
+    constructor(screenSize, screenWidth, screenHeight) {
         this.memory = new Uint8Array(4096); // Main memory
         this.V = new Uint8Array(16); // General purpose registers
         this.I = 0;    // Instruction register
@@ -10,7 +10,9 @@ class Chip8Machine {
         this.DT = 0;   // Delay timer
         this.ST = 0;   // Sound timer
         this.screen = new Uint8Array(screenSize);
-        this.hold = false;  // Indicate if we should advance to the next instruction
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+        this.hold = false;  // Indicate if the machine should advance to the next instruction
 
         this.lookupTable = {
             0x0: this.SYS,
@@ -64,7 +66,8 @@ class Chip8Machine {
         if (!this.hold) {
             // Advance PC, and take that into account in the couple of instructions that do not need that
             this.PC += 2;
-        }
+        } else
+            this.hold = false;
     }
 
     executeInst() {
@@ -149,7 +152,8 @@ class Chip8Machine {
     ///////////////////////////
     JP1(inst) {
         let addr = this.extractPayload(inst);
-        this.PC = addr - 2;
+        this.PC = addr;
+        this.hold = true;
     }
 
     /////////////////////////
@@ -158,7 +162,8 @@ class Chip8Machine {
     ///////////////////////////
     JPB(inst) {
         let addr = this.extractPayload(inst);
-        this.PC = this.V[0] + addr - 2;
+        this.PC = this.V[0] + addr;
+        this.hold = true;
     }
 
     /////////////////////////////
@@ -174,7 +179,8 @@ class Chip8Machine {
         this.SP++;
         // Return the the following address
         this.S[this.SP] = this.PC;
-        this.PC = addr-2;
+        this.PC = addr;
+        this.hold = true;
     }
 
 
@@ -185,7 +191,7 @@ class Chip8Machine {
     SE3(inst) {
         var [reg,num] = this.extractReg(inst);
         if (this.V[reg] == num) {
-            this.PC+=2;
+            this.PC += 2;
         }
     }
 
@@ -196,7 +202,7 @@ class Chip8Machine {
     SNE4(inst) {
         var [reg,num] = this.extractReg(inst);
         if (this.V[reg] != num) {
-            this.PC+=2;
+            this.PC += 2;
         }
     }
 
@@ -211,7 +217,7 @@ class Chip8Machine {
             throw "Invalid instruction read!";
         }
         if (this.V[x] == this.V[y]) {
-            this.PC+=2;
+            this.PC += 2;
         }
     }
 
@@ -222,13 +228,16 @@ class Chip8Machine {
     // Set I = nnn        //
     ////////////////////////
     LD(inst) {
-        let [reg, num] = this.extractReg(inst);
         switch(this.extractPrefix(inst)) {
             case 0x6: // Store value on V registers
+                let [reg, num] = this.extractReg(inst);
                 this.V[reg] = num;
                 break;
             case 0xA: // Store value on I register
                 this.I = this.extractPayload(inst);
+            default:
+                console.log(this);
+                throw "Invalid instruction read!";
         }
     }
 
@@ -340,6 +349,24 @@ class Chip8Machine {
         this.V[reg] = this.getRandomInt(0, 255) & num;
     }
 
+    // Fx07 - LD Vx, DT
+    // Set Vx = delay timer value.
+    // Fx0A - LD Vx, K
+    // Wait for a key press, store the value of the key in Vx.
+    // Fx15 - LD DT, Vx
+    // Set delay timer = Vx.
+    // Fx18 - LD ST, Vx
+    // Set sound timer = Vx.
+    // Fx1E - ADD I, Vx
+    // Set I = I + Vx.
+    // Fx29 - LD F, Vx
+    // Set I = location of sprite for digit Vx.
+    // Fx33 - LD B, Vx
+    // Store BCD representation of Vx in memory locations I, I+1, and I+2.
+    // Fx55 - LD [I], Vx
+    // Store registers V0 through Vx in memory starting at location I.
+    // Fx65 - LD Vx, [I]
+    // Read registers V0 through Vx from memory starting at location I.
     FN(inst) {
         let [reg, num] = this.extractReg(inst);
         switch(num) {
@@ -425,7 +452,7 @@ class Chip8Machine {
 
 }
 
-var makeMachine = function(screenSize) {
-    var machine = new Chip8Machine(screenSize);
+var makeMachine = function(screenSize, screenWidth, screenHeight) {
+    var machine = new Chip8Machine(screenSize, screenWidth, screenHeight);
     return machine;
 }
