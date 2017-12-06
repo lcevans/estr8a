@@ -31,7 +31,7 @@ var drawEmulatorToCanvas = (emulator) => {
             var byteAddress = Math.floor((y * emulator.screenWidth + x) / 8);
             // This is the bit we need to read from the byte for this pixel, with 0 being the left most bit.
             var bitOffset = (y * emulator.screenWidth + x) % 8;
-            var byte = emulator.screen[byteAddress];
+            var byte = emulator.machine.screen[byteAddress];
             // 1 << 7 gives the left most bit in the byte(128), 1 << 0 will give the right most bit in the byte(1).
             if (byte & (1 << (7 - bitOffset))) {
                 context.putImageData(blackPixel, x, y);

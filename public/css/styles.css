@@ -3,6 +3,17 @@ body {
     background-color: #DDD;
 }
 
+/* Titlebar display */
+#games-list {
+    float: left;
+    margin-right: 10px;
+}
+#load-game {
+    float: left;
+    margin-right: 10px;
+}
+
+
 /* Canvas screen display */
 .canvasContainer {
     display:inline-block;
@@ -11,10 +22,13 @@ body {
 }
 
 /* Memory display */
-.memory {
+.memoryContainer {
     display: inline-block;
-    height: 400px;
     vertical-align: top;
+}
+.memory {
+    display: none;
+    height: 400px;
     margin-right: 20px;
     padding: 5px;
     border: 1px solid black;

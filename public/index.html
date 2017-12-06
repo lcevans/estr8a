@@ -3,14 +3,35 @@
     <link rel="stylesheet" type="text/css" href="css/styles.css"/>
 </head>
 <body>
+  <div id="title-bar">
+    <select id="games-list">
+      <!-- Populated from call to /api/games -->
+    </select>
+    <input id="load-game" type="button" value="Load Game">
+    <button id="play-button">Play</button>
+    <button id="pause-button">Pause</button>
+    <button id="step-button">Step</button>
+    <select id="speed-select">
+        <option selected value="60">60Hz</option>
+        <option value="10">10Hz</option>
+        <option value="5">5Hz</option>
+        <option value="1">1Hz</option>
+    </select>
+    <div id="current-game">No Game Loaded</div>
+  </div>
   <div class="js-sound">
     <input id="js-sound-input" type="number">
     <input id="js-sound-button" type="button" value="Start Sound">
     <div id="js-sound-register"></div>
     <!-- The sound display will be appended here -->
 </div>
-<div class="js-memory memory">
-    <!-- The memory display will be appended here -->
+<div class="memoryContainer">
+    <button class="js-toggleMemory">Memory</button>
+    <div>
+        <div class="js-memory memory">
+            <!-- The memory display will be appended here -->
+        </div>
+    </div>
 </div>
 <div class="js-canvasContainer canvasContainer">
     <!-- The canvas display will be appended here -->
@@ -19,8 +40,10 @@
     <!-- The keyboard display will be appended here -->
 </div>
 </body>
+<script src="/js/titlebar.js"></script>
 <script src="/js/sound.js"></script>
 <script src="/js/keyboard.js"></script>
+<script src="/js/Chip8Machine.js"></script>
 <script src="/js/Chip8Emulator.js"></script>
 <script src="/js/digits.js"></script>
 <script src="/js/memory.js"></script>
