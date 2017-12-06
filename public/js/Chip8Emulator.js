@@ -1,5 +1,3 @@
-var TICK_MS = 16; // ms between ticks
-
 class Chip8Emulator {
     constructor(screenWidth, screenHeight, MakeMachine) {
         this.screenWidth = screenWidth;
@@ -12,6 +10,8 @@ class Chip8Emulator {
         // This is named to indicate whether the emulator should play if
         // a game is loaded.
         this.shouldPlay = true;
+        // The number of instructions the emulator should attempt to run each second.
+        this.instructionsPerSecond = 60;
 
         // This is dummy code to test that drawing the screen works roughly how we are expecting:
         for (var i = 0; i < 16; i++) {
@@ -51,6 +51,11 @@ class Chip8Emulator {
         }
     }
 
+    // Returns whether the emulator is currently running.
+    isRunning() {
+        return !!this.mainLoopId;
+    }
+
     startEmulator() {
         this.shouldPlay = true;
         // Clear the existing emulation loop, if for some reason this is called while emulation
@@ -58,7 +63,7 @@ class Chip8Emulator {
         if (this.mainLoopId) {
             clearInterval(this.mainLoopId);
         }
-        this.mainLoopId = setInterval(() => this.emulationLoop(), TICK_MS);
+        this.mainLoopId = setInterval(() => this.emulationLoop(), Math.ceil(1000 / this.instructionsPerSecond ));
     }
 
     pauseEmulator() {
