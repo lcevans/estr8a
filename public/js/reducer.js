@@ -1,3 +1,7 @@
+// TODO: Improve the understandability of the mask and shifts.
+// TODO: It's weird to increment the program counter by 2 every time.
+
+
 const defaultState = {
     memory: new Uint8Array(0x1000),
     register: new Uint8Array(0x10),
@@ -13,7 +17,7 @@ const defaultState = {
 
 
 const step = (state = defaultState, instruction) => {
-    const opCode = (instruction & 0xF000) >> 8;
+    const opCode = (instruction & 0xF000) >> 12;
     switch(opCode) {
         case 0x0: {
             switch(instruction) {
@@ -21,7 +25,7 @@ const step = (state = defaultState, instruction) => {
                 case 0x00e0:
                     return Object.merge(state, {
                         screen: null,
-                        programCounter: state.programCounter++,
+                        programCounter: state.programCounter + 0x2,
                     });
             }
         }
@@ -42,9 +46,201 @@ const step = (state = defaultState, instruction) => {
             // FIXME throw a horrible exception for stack overflow
             return Object.merge(state, {
                 stack,
-                stackPointer: state.stackPointer++,
+                stackPointer: state.stackPointer + 0x1,
                 programCounter: addr,
             });
+
+        // SE Vx, byte
+        case 0x3: {
+            const value = instruction & 0x00ff;
+            const x = (instruction & 0x0f00) >> 8;
+            const increment = value === state.register[x] ? 4 : 2;
+            return Object.merge(state, {
+                programCounter: state.programCounter + increment,
+            });
+        }
+
+        // SNE Vx, value
+        case 0x4: {
+            const value = instruction & 0x00ff;
+            const x = (instruction & 0x0f00) >> 8;
+            const increment = value !== state.register[x] ? 4 : 2;
+            return Object.merge(state, {
+                programCounter: state.programCounter + increment,
+            });
+        }
+
+        // SE Vx,Vy
+        case 0x5: {
+            const x = (instruction & 0x0f00) >> 8;
+            const y = (instruction & 0x00f0) >> 4;
+            const increment = state.register[x] === state.register[y] ? 4 : 2;
+            return Object.merge(state, {
+                programCounter: state.programCounter + increment,
+            });
+        }
+
+        // LD Vx, value
+        case 0x6: {
+            const value = instruction & 0x00ff;
+            const x = (instruction & 0x0f00) >> 8;
+            const memory = state.memory;
+            memory[x] = value;
+            return Object.merge(state, {
+                programCounter: state.programCounter + 0x2,
+                memory,
+            });
+        }
+
+        // ADD Vx, value
+        case 0x7: {
+            const value = instruction & 0x00ff;
+            const x = (instruction & 0x0f00) >> 8;
+            const register = state.register;
+            register[x] += value;
+            return Object.merge(state, {
+                programCounter: state.programCounter + 0x2,
+                register,
+            });
+        }
+
+        // ALU family looks like
+        case 0x8: {
+            const x = (instruction & 0x0f00) >> 8;
+            const y = (instruction & 0x00f0) >> 4;
+            const operation = (instruction & 0x000f);
+            const register = state.register;
+
+            switch (operation) {
+                // LD Vx, Vy
+                case 0x0: {
+                    register[x] = register[y];
+                }
+
+                // OR Vx, Vy
+                case 0x1: {
+                    register[x] = register[x] | register[y];
+                }
+
+                // AND Vx, Vy
+                case 0x2: {
+                    register[x] = register[x] & register[y];
+                }
+
+                // XOR Vx, Vy
+                case 0x3: {
+                    register[x] = register[x] ^ register[y];
+                }
+
+                // ADD Vx, Vy
+                case 0x4: {
+                    const extendedSum = register[x] + register[y];
+                    const sum = extendedSum & 0x00ff;
+                    const carry = (extendedSum & 0xff00) >> 8;
+                    register[x] = sum;
+                    register[0xf] = carry;
+                }
+
+                // SUB Vx, Vy
+                case 0x5: {
+                    const diff = register[x] - register[y];
+                    let notBorrow;
+                    if (register[x] > register[y]) {
+                        notBorrow = 1;
+                    } else {
+                        notBorrow = 0;
+                        diff += 0x100;
+                    }
+                    register[x] = diff;
+                    register[0xf] = notBorrow;
+                }
+
+                // SHR Vx {, Vy}
+                // TODO does this mean to apply the same for Vy?
+                case 0x6: {
+                    const lsb = register[x] & 0b1;
+                    register[x] = register[x] >> 1;
+                    register[0xF] = lsb;
+                }
+
+                // SUBN Vx, Vy
+                case 0x7: {
+                    const diff = register[y] - register[x];
+                    let notBorrow;
+                    if (register[y] > register[x]) {
+                        notBorrow = 1;
+                    } else {
+                        notBorrow = 0;
+                        diff += 0x100;
+                    }
+                    register[x] = diff;
+                    register[0xf] = notBorrow;
+                }
+
+                // SHL Vx {, Vy}
+                // TODO does this mean to apply the same for Vy?
+                case 0x6: {
+                    const msb = register[x] & 0b10000000;
+                    register[x] = register[x] << 1;
+                    register[0xF] = msb;
+                }
+
+            }
+
+            return Object.merge(state, {
+                programCounter: state.programCounter + 0x2,
+                register,
+            });
+
+        }
+
+        // SNE Vx, Vy
+        case 0x9: {
+            const x = (instruction & 0x0f00) >> 8;
+            const y = (instruction & 0x00f0) >> 4;
+            const increment = state.register[x] !== state.register[y] ? 4 : 2;
+            return Object.merge(state, {
+                programCounter: state.programCounter + increment,
+            });
+        }
+
+        // LD I, addr
+        case 0xa: {
+            const addr = instruction & 0x0fff;
+            return Object.merge(state, {
+                iRegister: addr;
+                programCounter: state.programCounter + 0x2,
+            });
+        }
+
+        // LD I, addr
+        case 0xb: {
+            const addr = instruction & 0x0fff;
+            return Object.merge(state, {
+                programCounter: addr + state.register[0x0],
+            });
+        }
+
+        // RDN Vx, value
+        case 0xc: {
+            const x = (instruction & 0x0f00) >> 8;
+            const value = instruction & 0x00ff;
+            const rand = Math.floor(0x100 * Math.random());
+            const register = state.register;
+            register[x] = rand & value;
+            return Object.merge(state, {
+                register,
+                programCounter: state.programCounter + 0x2,
+            });
+        }
+
+        // DRW Vx, Vy, nibble
+        case 0xd: {
+            const x = (instruction & 0x0f00) >> 8;
+            const y = (instruction & 0x00f0) >> 4;
+            const n = (instruction & 0x000f) >> 0;
+            // TODO Biggest ever
+        }
 
     }
     return state;
