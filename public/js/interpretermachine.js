@@ -15,11 +15,15 @@ class InterpreterMachine {
     tick() {
         // Fetch Opcode
         const instruction = reducerModule.nextInstruction(this.state);
+        // Handle input separately
+        this.setState(reducerModule.readInput(this.state));
         this.setState(reducerModule.step(this.state, instruction));
     }
+
     loadGame(data) {
         this.setState(reducerModule.loadProgram(data));
     }
+
 }
 
 var makeMachine = function(screenSize) {

@@ -410,6 +410,14 @@ const reducerModule = {
         return firstHalf | secondHalf;
     },
 
+    readInput: (state = defaultState) => {
+        const keyboard = new Uint8Array(0x10);
+        for (let i = 0; i < 0x10; i++) {
+            keyboard[i] = isChipKeyDown(i);
+        }
+        return Object.assign({}, state, { keyboard });
+    },
+
     initializeScreen: (state, screenSize) => {
         return Object.assign({}, state, {
             screen: new Uint8Array(screenSize),
