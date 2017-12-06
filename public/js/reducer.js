@@ -288,7 +288,7 @@ const reducerModule = {
                     }
                     // LD Vx, K
                     // Wait for a key press, store the value of the key in Vx.
-                    // We simulate this by decreasing PC if no key is down => we will call this command again next cycle
+                    // We simulate this by not incrementing PC if no key is down => we will call this command again next cycle
                     case 0x0a: {
                         for(var i=1; i<16; i++)
                         {
