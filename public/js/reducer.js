@@ -44,9 +44,6 @@ const reducerModule = {
                 const stack = state.stack.slice();
                 stack[state.stackPointer] = state.programCounter;
                 // FIXME throw a horrible exception for stack overflow
-                console.log(state.stackPointer)
-                console.log(state.programCounter)
-                console.log(stack)
                 return Object.assign({}, state, {
                     stack,
                     stackPointer: state.stackPointer + 0x1,
