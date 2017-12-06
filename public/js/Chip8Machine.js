@@ -1,3 +1,4 @@
+var FONT_MEMORY_OFFSET = 16;
 class Chip8Machine {
     constructor(screenSize) {
         this.memory = new Uint8Array(4096); // Main memory
@@ -9,12 +10,20 @@ class Chip8Machine {
         this.DT = 0;   // Delay timer
         this.ST = 0;   // Sound timer
         this.screen = new Uint8Array(screenSize);
+        // Add the chip font to the beginning of memory.
+        for (var i = 0; i < digits.length; i++) {
+            this.loadDataToOffset(digits[i], FONT_MEMORY_OFFSET + i * 5);
+        }
     }
 
     loadGame(data) {
+        // Write the loaded game to memory starting at 0x200.
+        this.loadDataToOffset(data, 512);
+    }
+
+    loadDataToOffset(data, offset) {
         for (var i = 0; i < data.length; i++) {
-            // Write the loaded game to memory starting at 0x200.
-            this.memory[512+i] = data[i];
+            this.memory[offset + i] = data[i];
         }
     }
 
