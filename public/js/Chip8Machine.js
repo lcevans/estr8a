@@ -108,7 +108,7 @@ class Chip8Machine {
     /////////////////////////////
     CALL(inst) {
         var addr = this.extractPayload(inst);
-        if (this.sp >= 15) {
+        if (this.SP >= 15) {
             console.log("Registers:", this);
             throw "Stack overflow!";
         }
@@ -232,7 +232,7 @@ class Chip8Machine {
             break;
         case 6:
             this.V[15] = this.V[x] & 0x0001;
-            this.V[x] = this.V[x] >>> 1;
+            this.V[x] = this.V[x] >>> 1; // TODO: Bug? Shift before assignment?
             break;
         case 7:
             var diff = this.V[y] - this.V[x];
@@ -295,10 +295,7 @@ class Chip8Machine {
     //////////////////////////////////
     RND(inst) {
         var [x, num] = this.extractPayload(inst);
-        var rand = 1;
-        while (rand == 1) {
-            rand = Math.random();
-        }
+        var rand = Math.random();
         this.V[x] = num & Math.floor(256*rand);
     }
 
@@ -318,12 +315,16 @@ class Chip8Machine {
     ///////////////////////////////////////////////////////////////////////
     KBD(inst) {
         var [x,num] = thisextractReg(inst);
-        if (num == 0x9E)
-            if (isChipKeyDown(x))
+        if (num == 0x9E) {
+            if (isChipKeyDown(x)) {
                 this.PC += 2;
-        else if (num == 0xA1)
-            if (! isChipKeyDown(x))
+            }
+        }
+        else if (num == 0xA1) {
+            if (! isChipKeyDown(x)) {
                 this.PC += 2;
+            }
+        }
         else {
             console.log(this);
             throw "Unrecognized instruction";
