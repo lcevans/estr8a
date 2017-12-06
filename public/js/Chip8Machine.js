@@ -9,6 +9,25 @@ class Chip8Machine {
         this.DT = 0;   // Delay timer
         this.ST = 0;   // Sound timer
         this.screen = new Uint8Array(screenSize);
+
+        this.lookupTable = {
+            0x0: this.SYS,
+            0x1: this.JP,
+            0x2: this.CALL,
+            0x3: this.SE3,
+            0x4: this.SNE4,
+            0x5: this.SE5,
+            0x6: this.LD,
+            0x7: this.INC,
+            0x8: this.ALU,
+            0x9: this.ALU,
+            0xA: this.ALU,
+            0xB: this.ALU,
+            0xC: this.ALU,
+            0xD: this.ALU,
+            0xE: this.ALU,
+            0xF: this.ALU,
+        };
     }
 
     loadGame(data) {
@@ -29,13 +48,31 @@ class Chip8Machine {
             this.DT--;
         }
 
+        this.executeInst();
+
         // Alwayd advance PC, and take that into account in the couple of instructions that do not need that
         this.PC += 2;
     }
 
+    executeInst() {
+        let inst = this.memory[this.PC] << 8 | this.memory[this.PC + 1];
+        this.lookupTable[inst >> 12](inst); // call the instruction function
+    }
+
+    // The maximum is inclusive and the minimum is inclusive
+    getRandomInt(min, max) {
+        const min = Math.ceil(min);
+        const max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
     ////////////////////////////////////////////////////////////////////////
     /////////////////////////////// ASSEMBLY ///////////////////////////////
     ////////////////////////////////////////////////////////////////////////
+
+    extractPrefix(inst) {
+        return inst >> 12;
+    }
 
     // Extract payload
     extractPayload(inst) {
@@ -81,10 +118,10 @@ class Chip8Machine {
         }
         // RET
         else if (y == 0xEE) {
-            if (this.regs.SP >= 0) {
-                this.regs.PC = this.regs.S[this.regs.SP];
-                this.regs.S[this.regs.SP] = 0;
-                this.regs.SP--;
+            if (this.SP >= 0) {
+                this.PC = this.S[this.SP];
+                this.S[this.SP] = 0;
+                this.SP--;
             }
             else {
                 console.log("Registers:", this.regs);
@@ -98,8 +135,15 @@ class Chip8Machine {
     // Jump to location nnn. //
     ///////////////////////////
     JP(inst) {
-        var addr = this.extractPayload(inst);
-        this.regs.PC = addr-2;
+        let addr = this.extractPayload(inst);
+        switch (this.extractPrefix(inst)) {
+            case 0x1: // Jump to address nnn
+                this.PC = addr - 2;
+                break;
+            case 0xB: // Jump to address
+                this.PC = this.V[0] + addr - 2;
+                break;
+        }
     }
 
     /////////////////////////////
@@ -108,14 +152,14 @@ class Chip8Machine {
     /////////////////////////////
     CALL(inst) {
         var addr = this.extractPayload(inst);
-        if (this.regs.sp >= 15) {
+        if (this.sp >= 15) {
             console.log("Registers:", this.regs);
             throw "Stack overflow!";
         }
-        this.regs.SP++;
+        this.SP++;
         // Return the the following address
-        this.regs.S[this.regs.SP] = this.regs.PC;
-        this.regs.PC = addr-2;
+        this.S[this.SP] = this.PC;
+        this.PC = addr-2;
     }
 
 
@@ -125,8 +169,8 @@ class Chip8Machine {
     ///////////////////////////////////////
     SE3(inst) {
         var [reg,num] = this.extractReg(inst);
-        if (this.regs.V[reg] == num) {
-            this.regs.PC+=2;
+        if (this.V[reg] == num) {
+            this.PC+=2;
         }
     }
 
@@ -136,8 +180,8 @@ class Chip8Machine {
     ////////////////////////////////////////
     SNE4(inst) {
         var [reg,num] = this.extractReg(inst);
-        if (this.regs.V[reg] != num) {
-            this.regs.PC+=2;
+        if (this.V[reg] != num) {
+            this.PC+=2;
         }
     }
 
@@ -151,8 +195,8 @@ class Chip8Machine {
             consile.log(this.regs);
             throw "Invalid instruction read!";
         }
-        if (this.regs.V[x] == this.regs.V[y]) {
-            this.regs.PC+=2;
+        if (this.V[x] == this.V[y]) {
+            this.PC+=2;
         }
     }
 
@@ -161,8 +205,14 @@ class Chip8Machine {
     // Set Vx = kk.       //
     ////////////////////////
     LD(inst) {
-        var [reg,num] = this.extractReg(inst);
-        this.regs.V[reg] = num;
+        let [reg, num] = this.extractReg(inst);
+        switch(inst >> 12) {
+            case 0x6: // Store value on V registers
+                this.V[reg] = num;
+                break;
+            case 0xA: // Store value on I register
+                this.I = this.extractPayload(inst);
+        }
     }
 
     /////////////////////////
@@ -171,7 +221,7 @@ class Chip8Machine {
     /////////////////////////
     INC(inst) {
         var [reg,num] = this.extractReg(inst);
-        this.regs.V[reg] += num;
+        this.V[reg] += num;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,57 +251,75 @@ class Chip8Machine {
         var [x,y,z] = this.extractRegs(inst);
         switch (z) {
         case 0:
-            this.regs.V[x] = this.regs.V[y];
+            this.V[x] = this.V[y];
             break;
         case 1:
-            this.regs.V[x] = this.regs.V[x] | this.regs.V[y];
+            this.V[x] = this.V[x] | this.V[y];
             break;
         case 2:
-            this.regs.V[x] = this.regs.V[x] & this.regs.V[y];
+            this.V[x] = this.V[x] & this.V[y];
             break;
         case 3:
-            this.regs.V[x] = this.regs.V[x] ^ this.regs.V[y];
+            this.V[x] = this.V[x] ^ this.V[y];
             break;
         case 4:
-            var sum = this.regs.V[x] + this.regs.V[y];
-            this.regs.V[15] = 0;
+            var sum = this.V[x] + this.V[y];
+            this.V[15] = 0;
             if (sum >= 2 ** 8) {
-                this.regs.V[15] = 1;
+                this.V[15] = 1;
                 sum -= 2 ** 8;
             }
-            this.regs.V[x] = sum;
+            this.V[x] = sum;
             break;
         case 5:
-            var diff = this.regs.V[x] - this.regs.V[y];
-            this.regs.V[15] = 1;
+            var diff = this.V[x] - this.V[y];
+            this.V[15] = 1;
             if (diff < 0) {
-                this.regs.V[15] = 0;
+                this.V[15] = 0;
                 diff += 2 ** 8;
             }
-            this.regs.V[x] = diff;
+            this.V[x] = diff;
             break;
         case 6:
-            this.regs.V[15] = this.regs.V[x] & 0x0001;
-            this.regs.V[x] = this.regs.V[x] >>> 1;
+            this.V[15] = this.V[x] & 0x0001;
+            this.V[x] = this.V[x] >>> 1;
             break;
         case 7:
-            var diff = this.regs.V[y] - this.regs.V[x];
-            this.regs.V[15] = 1;
+            var diff = this.V[y] - this.V[x];
+            this.V[15] = 1;
             if (diff < 0) {
-                this.regs.V[15] = 0;
+                this.V[15] = 0;
                 diff += 2 ** 8;
             }
-            this.regs.V[x] = diff;
+            this.V[x] = diff;
             break;
         case 14:
-            this.regs.V[15] = this.regs.V[x] >>> 15;
-            this.regs.V[x] = this.regs.V[x] << 1;
+            this.V[15] = this.V[x] >>> 15;
+            this.V[x] = this.V[x] << 1;
             break;
         default:
             console.log("Registers:", this.regs);
             throw "Unrecognized instruction!";
             break;
         }
+    }
+
+    // 9xy0 - SNE Vx, Vy
+    SNE(inst) {
+        let [x, y, num] = this.extractRegs(inst);
+        if (this.V[x] !== this.V[y])
+            this.PC += 2;
+    }
+
+    // Cxkk - RND Vx, byte
+    RND(inst) {
+        let [reg, num] = this.extractReg(inst);
+        this.V[reg] = this.getRandomInt(0, 255) & num;
+    }
+
+    // Dxyn - DRW Vx, Vy, nibble
+    // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+    DRW(inst) {
     }
 }
 
