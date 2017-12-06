@@ -28,7 +28,7 @@ document.onreadystatechange = function() {
                 b0 = view.getUint8(i);
                 b1 = view.getUint8(i+1);
                 hex_str = (b0 >> 4).toString(16) + (b0 & 0xF).toString(16) + (b1 >> 4).toString(16) + (b1 & 0xF).toString(16);
-                my_log(hex_str + " -> " + ASMtoString(wordToASM(hex_str)));
+                my_log(hex_str + " -> " + ASMtoString(wordToASM(b0 << 8 | b1)));
             }
         });
         reader.readAsArrayBuffer(game_file);
