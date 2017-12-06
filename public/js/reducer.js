@@ -5,7 +5,7 @@
 const defaultState = {
     memory: new Uint8Array(0x1000),
     register: new Uint8Array(0x10),
-    stack: new Uint8Array(0x10),
+    stack: new Uint16Array(0x10),
     programCounter: 0x200,
     stackPointer: 0x0,
     iRegister: 0x0,
@@ -18,15 +18,24 @@ const defaultState = {
 
 const reducerModule = {
     step: (state = defaultState, instruction) => {
+        if (typeof(instruction) === 'undefined') {
+            console.warn('Using default state');
+            return state;
+        }
+        const displayInstruction = '0x' + instruction.toString(16)
         const opCode = (instruction & 0xF000) >> 12;
         switch(opCode) {
             case 0x0: {
                 switch(instruction) {
                     // CLS
                     case 0x00e0:
-                        return Object.assign({}, reducerModule.initializeScreen(state, state.screenSize),
-                                             { programCounter: state.programCounter + 2 });
+                        return Object.assign(
+                            {},
+                            reducerModule.initializeScreen(state, state.screenSize),
+                            { programCounter: state.programCounter + 2 }
+                        );
                 }
+                throw `Unrecognized instruction ${displayInstruction}`;
             }
 
             // JP addr
@@ -40,7 +49,7 @@ const reducerModule = {
             // CALL addr
             case 0x2: {
                 const addr = instruction & 0x0fff;
-                const stack = state.stack;
+                const stack = state.stack.slice();
                 stack[state.stackPointer] = state.programCounter;
                 // FIXME throw a horrible exception for stack overflow
                 return Object.assign({}, state, {
@@ -49,6 +58,7 @@ const reducerModule = {
                     programCounter: addr,
                 });
             }
+
             // SE Vx, byte
             case 0x3: {
                 const value = instruction & 0x00ff;
@@ -83,7 +93,7 @@ const reducerModule = {
             case 0x6: {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
-                const memory = state.memory;
+                const memory = state.memory.slice();
                 memory[x] = value;
                 return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
@@ -95,7 +105,7 @@ const reducerModule = {
             case 0x7: {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
-                const register = state.register;
+                const register = state.register.slice();
                 register[x] += value;
                 return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
@@ -108,27 +118,31 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const operation = (instruction & 0x000f);
-                const register = state.register;
+                const register = state.register.slice();
 
                 switch (operation) {
                     // LD Vx, Vy
                     case 0x0: {
                         register[x] = register[y];
+                        break;
                     }
 
                     // OR Vx, Vy
                     case 0x1: {
                         register[x] = register[x] | register[y];
+                        break;
                     }
 
                     // AND Vx, Vy
                     case 0x2: {
                         register[x] = register[x] & register[y];
+                        break;
                     }
 
                     // XOR Vx, Vy
                     case 0x3: {
                         register[x] = register[x] ^ register[y];
+                        break;
                     }
 
                     // ADD Vx, Vy
@@ -138,6 +152,7 @@ const reducerModule = {
                         const carry = (extendedSum & 0xff00) >> 8;
                         register[x] = sum;
                         register[0xf] = carry;
+                        break;
                     }
 
                     // SUB Vx, Vy
@@ -152,6 +167,7 @@ const reducerModule = {
                         }
                         register[x] = diff;
                         register[0xf] = notBorrow;
+                        break;
                     }
 
                     // SHR Vx {, Vy}
@@ -160,6 +176,7 @@ const reducerModule = {
                         const lsb = register[x] & 0b1;
                         register[x] = register[x] >> 1;
                         register[0xF] = lsb;
+                        break;
                     }
 
                     // SUBN Vx, Vy
@@ -174,6 +191,7 @@ const reducerModule = {
                         }
                         register[x] = diff;
                         register[0xf] = notBorrow;
+                        break;
                     }
 
                     // SHL Vx {, Vy}
@@ -182,7 +200,12 @@ const reducerModule = {
                         const msb = register[x] & 0b10000000;
                         register[x] = register[x] << 1;
                         register[0xF] = msb;
+                        break;
                     }
+
+                    default:
+                        throw `Unrecognized instruction ${displayInstruction}`;
+
 
                 }
 
@@ -225,7 +248,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const value = instruction & 0x00ff;
                 const rand = Math.floor(0x100 * Math.random());
-                const register = state.register;
+                const register = state.register.slice();
                 register[x] = rand & value;
                 return Object.assign({}, state, {
                     register,
@@ -239,17 +262,22 @@ const reducerModule = {
                 const y = (instruction & 0x00f0) >> 4;
                 const n = (instruction & 0x000f) >> 0;
                 // TODO Biggest ever
-
+                break; // Till we return
             }
+
+            default:
+                throw `Unrecognized instruction ${displayInstruction}`;
 
         }
         return state;
     },
 
-    loadProgram: (state = defaultState, program) => {
-        const memory = state.memory;
+    loadProgram: (program) => {
+        const state = Object.assign({}, defaultState);
+        const memory = state.memory.slice();
+        const reserved = 0x200;
         for (let i = 0; i < program.length; i++) {
-            memory[i] = program[i];
+            memory[reserved + i] = program[i];
         }
         return Object.assign({}, state, { memory });
     },
@@ -261,6 +289,9 @@ const reducerModule = {
     },
 
     initializeScreen: (state, screenSize) => {
-        return Object.assign({}, state, { screen: new Uint8Array(screenSize), screenSize: screenSize });
+        return Object.assign({}, state, {
+            screen: new Uint8Array(screenSize),
+            screenSize: screenSize
+        });
     }
 }
