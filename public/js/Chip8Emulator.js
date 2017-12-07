@@ -63,7 +63,15 @@ class Chip8Emulator {
         if (this.mainLoopId) {
             clearInterval(this.mainLoopId);
         }
-        this.mainLoopId = setInterval(() => this.emulationLoop(), Math.ceil(1000 / this.instructionsPerSecond ));
+        this.mainLoopId = setInterval(() => this.emulationLoop(), this.getFrameInterval());
+    }
+
+    getInstructionsPerFrame() {
+        return this.shouldPlay ? Math.ceil(this.instructionsPerSecond / 10) : 1;
+    }
+
+    getFrameInterval() {
+        return 1000 / (this.instructionsPerSecond / this.getInstructionsPerFrame());
     }
 
     pauseEmulator() {
@@ -77,7 +85,9 @@ class Chip8Emulator {
     }
 
     emulationLoop() {
-        this.drawFlag = this.drawFlag || this.machine.tick()
+        for (var i = 0; i < this.getInstructionsPerFrame(); i++) {
+            this.drawFlag = this.machine.tick() || this.drawFlag;
+        }
     }
 
     renderLoop() {
