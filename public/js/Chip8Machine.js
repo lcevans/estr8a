@@ -245,9 +245,10 @@ class Chip8Machine {
                 break;
             case 0xA: // Store value on I register
                 this.I = this.extractPayload(inst);
+                break;
             default:
                 console.log(this);
-                throw "Invalid instruction read!";
+                throw `Invalid instruction read: 0x${this.extractPrefix(inst).toString(16).toUpperCase()}`;
         }
     }
 
@@ -452,7 +453,7 @@ class Chip8Machine {
         for (let i = 0; i < n; i++) {
             // Check if we need to wrap row values
             if (y2 + i > this.screenHeight - 1) y2 = 0;
-            let byteIndex = coordsToIndex(x2, y2 + i);
+            let byteIndex = coordsToIndex(cX, y2 + i);
             let spriteByte = this.memory[this.I + i];
             if (cX % 8 !== 0) {
                 // Set the left part of the byte
