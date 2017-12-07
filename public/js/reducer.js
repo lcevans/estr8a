@@ -50,6 +50,15 @@ const reducerModule = {
                             programCounter: state.programCounter + 2
                         });
                     }
+                    // RET
+                    case 0x00ee: {
+                        const stackPointer = state.stackPointer - 1;
+                        const programCounter = state.stack[stackPointer] + 2;
+                        return decreaseTimers(state, {
+                            programCounter,
+                            stackPointer,
+                        });
+                    }
                 }
                 throw `Unrecognized instruction ${displayInstruction}`;
             }
@@ -109,11 +118,11 @@ const reducerModule = {
             case 0x6: {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
-                const memory = state.memory.slice();
-                memory[x] = value;
+                const register = state.register.slice();
+                register[x] = value;
                 return decreaseTimers(state, {
                     programCounter: state.programCounter + 0x2,
-                    memory,
+                    register,
                 });
             }
 
