@@ -77,7 +77,7 @@ class Chip8Emulator {
     }
 
     emulationLoop() {
-        this.drawFlag = this.machine.tick()
+        this.drawFlag = this.drawFlag || this.machine.tick()
     }
 
     renderLoop() {
