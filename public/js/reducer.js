@@ -22,11 +22,11 @@ const defaultState = {
 };
 
 
-const decreaseTimers = (state, overrides) => {
+const decreaseTimers = (state) => {
     return Object.assign({}, state, {
         dtRegister: state.dtRegister > 0 ? state.dtRegister - 1 : 0,
         stRegister: state.stRegister > 0 ? state.stRegister - 1 : 0,
-    }, overrides);
+    });
 }
 
 
@@ -47,7 +47,7 @@ const reducerModule = {
                         const newState = reducerModule.initializeScreen(
                             state, state.screenSize
                         );
-                        return decreaseTimers(newState, {
+                        return Object.assign({}, newState, {
                             programCounter: state.programCounter + 2
                         });
                     }
@@ -58,7 +58,7 @@ const reducerModule = {
                         }
                         const stackPointer = state.stackPointer - 1;
                         const programCounter = state.stack[stackPointer] + 2;
-                        return decreaseTimers(state, {
+                        return Object.assign({}, state, {
                             programCounter,
                             stackPointer,
                         });
@@ -70,7 +70,7 @@ const reducerModule = {
             // JP addr
             case 0x1: {
                 const addr = instruction & 0x0fff;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: addr
                 });
             }
@@ -84,7 +84,7 @@ const reducerModule = {
                 const stack = state.stack.slice();
                 stack[state.stackPointer] = state.programCounter;
                 // FIXME throw a horrible exception for stack overflow
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     stack,
                     stackPointer: state.stackPointer + 0x1,
                     programCounter: addr,
@@ -96,7 +96,7 @@ const reducerModule = {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
                 const increment = value === state.register[x] ? 4 : 2;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -106,7 +106,7 @@ const reducerModule = {
                 const value = instruction & 0x00ff;
                 const x = (instruction & 0x0f00) >> 8;
                 const increment = value !== state.register[x] ? 4 : 2;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -116,7 +116,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const increment = state.register[x] === state.register[y] ? 4 : 2;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -127,7 +127,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const register = state.register.slice();
                 register[x] = value;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
                     register,
                 });
@@ -139,7 +139,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const register = state.register.slice();
                 register[x] += value;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
                     register,
                 });
@@ -241,7 +241,7 @@ const reducerModule = {
 
                 }
 
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + 0x2,
                     register,
                 });
@@ -253,7 +253,7 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const increment = state.register[x] !== state.register[y] ? 4 : 2;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: state.programCounter + increment,
                 });
             }
@@ -261,7 +261,7 @@ const reducerModule = {
             // LD I, addr
             case 0xa: {
                 const addr = instruction & 0x0fff;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     iRegister: addr,
                     programCounter: state.programCounter + 0x2,
                 });
@@ -270,7 +270,7 @@ const reducerModule = {
             // LD I, addr
             case 0xb: {
                 const addr = instruction & 0x0fff;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     programCounter: addr + state.register[0x0],
                 });
             }
@@ -282,7 +282,7 @@ const reducerModule = {
                 const rand = Math.floor(0x100 * Math.random());
                 const register = state.register.slice();
                 register[x] = rand & value;
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     register,
                     programCounter: state.programCounter + 0x2,
                 });
@@ -295,7 +295,7 @@ const reducerModule = {
                 const n = (instruction & 0x000f) >> 0;
                 const Vx = state.register[x];
                 const Vy = state.register[y];
-                return decreaseTimers(reducerModule.draw(state, Vx, Vy, n), {
+                return Object.assign({}, reducerModule.draw(state, Vx, Vy, n), {
                     programCounter: state.programCounter + 0x2,
                 });
             }
@@ -308,7 +308,7 @@ const reducerModule = {
                     case 0x9E: {
                         const key = state.register[x];
                         const increment = state.keyboard[key] ? 4 : 2;
-                        return decreaseTimers(state, {
+                        return Object.assign({}, state, {
                             programCounter: state.programCounter + increment,
                         });
                     }
@@ -316,7 +316,7 @@ const reducerModule = {
                     case 0xA1: {
                         const key = state.register[x];
                         const increment = !state.keyboard[key] ? 4 : 2;
-                        return decreaseTimers(state, {
+                        return Object.assign({}, state, {
                             programCounter: state.programCounter + increment,
                         });
                     }
@@ -344,7 +344,7 @@ const reducerModule = {
                         {
                             if(state.keyboard[i]) {
                                 register[x] = i;
-                                return decreaseTimers(state, {
+                                return Object.assign({}, state, {
                                     register,
                                     programCounter: state.programCounter + 2,
                                 });
@@ -352,11 +352,11 @@ const reducerModule = {
                             }
                         }
                         // No key is down so do nothing (PC unchanged so we will call this command again)
-                        return decreaseTimers(state, {});
+                        return Object.assign({}, state, {});
                     }
                     // LD DT, Vx
                     case 0x15: {
-                        return decreaseTimers(state, {
+                        return Object.assign({}, state, {
                             dtRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
@@ -364,14 +364,14 @@ const reducerModule = {
                     // LD ST, Vx
                     case 0x18: {
                         state.stRegister = state.register[x];
-                        return decreaseTimers(state, {
+                        return Object.assign({}, state, {
                             stRegister: state.register[x],
                             programCounter: state.programCounter + 2,
                         });
                     }
                     // ADD I, Vx
                     case 0x1e: {
-                        return decreaseTimers(state, {
+                        return Object.assign({}, state, {
                             iRegister: state.iRegister + state.register[x],
                             programCounter: state.programCounter + 2,
                         });
@@ -380,7 +380,7 @@ const reducerModule = {
                     // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
                     case 0x29: {
                         // NOTE: This assumes the "chip-font" sprites are loaded here in memory
-                        return decreaseTimers(state, {
+                        return Object.assign({}, state, {
                             iRegister: 5 * state.register[x],
                             programCounter: state.programCounter + 2,
                         });
@@ -421,7 +421,7 @@ const reducerModule = {
                         throw `Unrecognized instruction ${displayInstruction}`;
                 }
 
-                return decreaseTimers(state, {
+                return Object.assign({}, state, {
                     memory,
                     register,
                     programCounter: state.programCounter + 2,
