@@ -67,7 +67,7 @@ class Chip8Emulator {
     }
 
     getInstructionsPerFrame() {
-        return this.shouldPlay ? Math.ceil(this.instructionsPerSecond / 10) : 1;
+        return this.shouldPlay ? Math.ceil(this.instructionsPerSecond / 40) : 1;
     }
 
     getFrameInterval() {
