@@ -362,7 +362,7 @@ const reducerModule = {
                     // ADD I, Vx
                     case 0x1e: {
                         return decreaseTimers(state, {
-                            iRegister: state.register[x],
+                            iRegister: state.iRegister + state.register[x],
                             programCounter: state.programCounter + 2,
                         });
                     }
