@@ -478,7 +478,11 @@ const reducerModule = {
         let xBitPos = Vx % (SCREEN_WIDTH * 8);
         for (let i = 0; i < n; i++) {
             const byteToDraw = memory[I + i];
-            const yBitPos = (Vy + i) % SCREEN_HEIGHT;
+            const yBitPos = (Vy + i);
+            // Don't draw off the bottom of the screen.
+            if (yBitPos >= SCREEN_HEIGHT) {
+                break;
+            }
             const screenBitPosition = xBitPos + yBitPos * SCREEN_WIDTH;
             const screenPositionI = screenBitPosition >> 3;
             // ByteToDraw will be drawn in two parts, a left part and a right part
@@ -495,10 +499,9 @@ const reducerModule = {
             if (rightChunkSize > 0) {
                 const rightMostPart = byteToDraw << (8-rightChunkSize);
                 let wrapCoord = screenPositionI + 1;
-                // If this wrapped across the screen, wrapCoord % 8 will be 0,
-                // and we need to subtract 8 to move back to the beginning of the
-                // initial row. The number 8 is screenWidth(64) / pixels per byte (8).
-                if (wrapCoord % 8 === 0) wrapCoord -= 8;
+                // Don't draw past the right edge of the screen.
+                // The number 8 is screenWidth(64) / pixels per byte (8).
+                if (wrapCoord % 8 === 0) continue;
                 if (colision == false && screen[wrapCoord] & rightMostPart) {
                     colision = true;
                 }
