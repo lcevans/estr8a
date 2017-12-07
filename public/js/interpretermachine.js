@@ -1,19 +1,31 @@
 class InterpreterMachine {
     constructor(screenSize) {
-        this.state = reducerModule.initializeScreen(reducerModule.step(), screenSize);
+        this.setState(reducerModule.initializeScreen(
+            reducerModule.step(),
+            screenSize
+        ));
+        this.screenSize = screenSize;
+    }
+
+    setState(state) {
+        this.state = state;
         this.screen = this.state.screen;
         this.memory = this.state.memory;
     }
+
     tick() {
-         // Fetch Opcode
-         const instruction = reducerModule.nextInstruction(this.state);
-         this.state = reducerModule.step(this.state, instruction);
+        // Fetch Opcode
+        const instruction = reducerModule.nextInstruction(this.state);
+        // Handle input separately
+        this.setState(reducerModule.readInput(this.state));
+        this.setState(reducerModule.step(this.state, instruction));
+        return instruction >> 12 === 0xD || instruction === 0x00E0; // Hack to force redraw.
     }
+
     loadGame(data) {
-        this.state = reducerModule.loadProgram(this.state, data);
-        this.screen = this.state.screen;
-        this.memory = this.state.memory;
+        this.setState(reducerModule.loadProgram(data, this.screenSize));
     }
+
 }
 
 var makeMachine = function(screenSize) {

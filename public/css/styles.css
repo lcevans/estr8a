@@ -37,6 +37,17 @@ body {
     font-family: monospace;
 }
 
+.register {
+    display: inline-block;
+    background-color: white;
+    padding: 4px;
+    border: 1px solid black;
+    font-family: monospace;
+}
+.register.updated {
+    background-color: #f80;
+}
+
 /* Keyboard display */
 .keyboardContainer {
     display: inline-block;
