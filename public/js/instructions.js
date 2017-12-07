@@ -99,9 +99,10 @@ Controls:<br>
 `,
     TETRIS : `
 Controls:<br>
-4 - Rotate<br>
+4 - Rotate Piece<br>
 5 - Left<br>
 6 - Right<br>
+7 - Drop Piece<br>
 `,
     TICTAC : `
 Controls:<br>
