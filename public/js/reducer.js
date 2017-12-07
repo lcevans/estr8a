@@ -228,7 +228,7 @@ const reducerModule = {
 
                     // SHL Vx {, Vy}
                     // TODO does this mean to apply the same for Vy?
-                    case 0x6: {
+                    case 0xe: {
                         const msb = register[x] & 0b10000000;
                         register[x] = register[x] << 1;
                         register[0xF] = msb;
