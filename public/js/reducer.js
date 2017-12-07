@@ -53,7 +53,7 @@ const reducerModule = {
                     }
                     // RET
                     case 0x00ee: {
-                        if (stackPointer === 0x0) {
+                        if (state.stackPointer === 0x0) {
                             throw `Stack underflow on instruction ${displayInstruction}`;
                         }
                         const stackPointer = state.stackPointer - 1;
@@ -77,7 +77,7 @@ const reducerModule = {
 
             // CALL addr
             case 0x2: {
-                if (stackPointer === 0xf) {
+                if (state.stackPointer === 0xf) {
                     throw `Stack overflow on instruction ${displayInstruction}`;
                 }
                 const addr = instruction & 0x0fff;
