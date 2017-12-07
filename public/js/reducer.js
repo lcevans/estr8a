@@ -23,8 +23,8 @@ const defaultState = {
 
 const decreaseTimers = (state, overrides) => {
     return Object.assign({}, state, {
-        dtRegister: state.dtRegister > 0 ? state.dtRegister-- : 0,
-        stRegister: state.stRegister > 0 ? state.stRegister-- : 0,
+        dtRegister: state.dtRegister > 0 ? state.dtRegister - 1 : 0,
+        stRegister: state.stRegister > 0 ? state.stRegister - 1 : 0,
     }, overrides);
 }
 
