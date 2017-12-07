@@ -53,6 +53,9 @@ const reducerModule = {
                     }
                     // RET
                     case 0x00ee: {
+                        if (stackPointer === 0x0) {
+                            throw `Stack underflow on instruction ${displayInstruction}`;
+                        }
                         const stackPointer = state.stackPointer - 1;
                         const programCounter = state.stack[stackPointer] + 2;
                         return decreaseTimers(state, {
@@ -74,6 +77,9 @@ const reducerModule = {
 
             // CALL addr
             case 0x2: {
+                if (stackPointer === 0xf) {
+                    throw `Stack overflow on instruction ${displayInstruction}`;
+                }
                 const addr = instruction & 0x0fff;
                 const stack = state.stack.slice();
                 stack[state.stackPointer] = state.programCounter;
