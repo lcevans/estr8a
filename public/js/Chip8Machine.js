@@ -15,27 +15,35 @@ class Chip8Machine {
         this.hold = false;  // Indicate if the machine should advance to the next instruction
 
         this.lookupTable = {
-            0x0: this.SYS,
-            0x1: this.JP1,
-            0x2: this.CALL,
-            0x3: this.SE3,
-            0x4: this.SNE4,
-            0x5: this.SE5,
-            0x6: this.LD,
-            0x7: this.INC,
-            0x8: this.ALU,
-            0x9: this.SNE,
-            0xA: this.LD,
-            0xB: this.JPB,
-            0xC: this.RND,
-            0xD: this.DRW,
-            0xE: this.KBD,
-            0xF: this.FN,
+            0x0: this.SYS.bind(this),
+            0x1: this.JP1.bind(this),
+            0x2: this.CALL.bind(this),
+            0x3: this.SE3.bind(this),
+            0x4: this.SNE4.bind(this),
+            0x5: this.SE5.bind(this),
+            0x6: this.LD.bind(this),
+            0x7: this.INC.bind(this),
+            0x8: this.ALU.bind(this),
+            0x9: this.SNE.bind(this),
+            0xA: this.LD.bind(this),
+            0xB: this.JPB.bind(this),
+            0xC: this.RND.bind(this),
+            0xD: this.DRW.bind(this),
+            0xE: this.KBD.bind(this),
+            0xF: this.FN.bind(this),
         };
         // Add the chip font to the beginning of memory.
         for (var i = 0; i < digits.length; i++) {
             this.loadDataToOffset(digits[i], FONT_MEMORY_OFFSET + i * 5);
         }
+    }
+
+    getProgramCounter() {
+        return this.PC;
+    }
+
+    getRegisters() {
+        return this.V;
     }
 
     loadGame(data) {
@@ -68,6 +76,8 @@ class Chip8Machine {
             this.PC += 2;
         } else
             this.hold = false;
+
+        return true;
     }
 
     executeInst() {
@@ -107,10 +117,10 @@ class Chip8Machine {
 
     // Extract a register value and a payload byte
     extractReg(inst) {
-        var payload = inst & 0x00FF;
+        let payload = inst & 0x00FF;
         inst = inst >>> 8;
-        var reg = inst & 0x000F;
-        return [reg,payload];
+        let reg = inst & 0x000F;
+        return [reg, payload];
     }
 
     ////////////////////////////////////////////
@@ -122,7 +132,7 @@ class Chip8Machine {
     // Return from a subroutine.              //
     ////////////////////////////////////////////
     SYS(inst) {
-        var [x,y] = this.extractReg(inst);
+        let [x, y] = this.extractReg(inst);
         // Ignore all syscalls other than return and cls
         if (x>0)
             return;

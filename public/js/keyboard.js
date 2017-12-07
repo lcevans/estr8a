@@ -21,7 +21,6 @@ var buttonPressed = null;
 
 var initializeKeyboard = () => {
     document.onkeydown = function(event) {
-        console.log(event.keyCode);
         keysDown[event.keyCode] = true;
     };
     document.onkeyup = function(event) {
