@@ -1,3 +1,6 @@
+import sys
+
+
 def format_instruction(two_bytes):
     first, second = two_bytes
     return f'{first:02x}{second:02x}'
@@ -110,7 +113,10 @@ def explain(instruction):
 
 
 if __name__ == '__main__':
-    filename = 'games/GUESS'
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+    else:
+        filename = 'games/DEBUG'
     print(f'reading the file {filename}')
     with open(filename, 'rb', buffering=0) as program:
         addr = 512
@@ -121,6 +127,6 @@ if __name__ == '__main__':
             pretty = format_instruction(instruction)
             info = explain(pretty)
             print(f'{addr:03x} {pretty} {info}')
-            addr += 1
+            addr += 2
 
 

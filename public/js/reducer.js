@@ -1,5 +1,6 @@
 // TODO: Improve the understandability of the mask and shifts.
 // TODO: It's weird to increment the program counter by 2 every time.
+// TODO: Move the codes with subcodes to their own reducers
 
 // Chip font will be loaded into memory at this address.
 const FONT_ADDRESS = 0x0;
@@ -52,6 +53,9 @@ const reducerModule = {
                     }
                     // RET
                     case 0x00ee: {
+                        if (state.stackPointer === 0x0) {
+                            throw `Stack underflow on instruction ${displayInstruction}`;
+                        }
                         const stackPointer = state.stackPointer - 1;
                         const programCounter = state.stack[stackPointer] + 2;
                         return decreaseTimers(state, {
@@ -73,6 +77,9 @@ const reducerModule = {
 
             // CALL addr
             case 0x2: {
+                if (state.stackPointer === 0xf) {
+                    throw `Stack overflow on instruction ${displayInstruction}`;
+                }
                 const addr = instruction & 0x0fff;
                 const stack = state.stack.slice();
                 stack[state.stackPointer] = state.programCounter;
@@ -206,7 +213,7 @@ const reducerModule = {
 
                     // SUBN Vx, Vy
                     case 0x7: {
-                        const diff = register[y] - register[x];
+                        let diff = register[y] - register[x];
                         let notBorrow;
                         if (register[y] > register[x]) {
                             notBorrow = 1;
@@ -286,8 +293,11 @@ const reducerModule = {
                 const x = (instruction & 0x0f00) >> 8;
                 const y = (instruction & 0x00f0) >> 4;
                 const n = (instruction & 0x000f) >> 0;
-                // TODO Biggest ever
-                return Object.assign({}, reducerModule.draw(state, state.register[x], state.register[y], n), { programCounter: state.programCounter + 0x2 });
+                const Vx = state.register[x];
+                const Vy = state.register[y];
+                return decreaseTimers(reducerModule.draw(state, Vx, Vy, n), {
+                    programCounter: state.programCounter + 0x2,
+                });
             }
 
             case 0xe: {
@@ -296,19 +306,19 @@ const reducerModule = {
                 switch(subOpCode) {
                     // SKP Vx - Skip the next instruction if the key represented by Vx is down.
                     case 0x9E: {
-                        let programCounter = state.programCounter + 2;
-                        if (isChipKeyDown(state.register[x])) {
-                            programCounter += 2;
-                        }
-                        return decreaseTimers(state, {programCounter});
+                        const key = state.register[x];
+                        const increment = state.keyboard[key] ? 4 : 2;
+                        return decreaseTimers(state, {
+                            programCounter: state.programCounter + increment,
+                        });
                     }
                     // SKNP Vx - Skip the next instruction if the key represented by Vx is not down.
                     case 0xA1: {
-                        let programCounter = state.programCounter + 2;
-                        if (!isChipKeyDown(state.register[x])) {
-                            programCounter += 2;
-                        }
-                        return decreaseTimers(state, {programCounter});
+                        const key = state.register[x];
+                        const increment = !state.keyboard[key] ? 4 : 2;
+                        return decreaseTimers(state, {
+                            programCounter: state.programCounter + increment,
+                        });
                     }
                 }
                 throw `Unrecognized instruction ${displayInstruction}`;
@@ -459,21 +469,21 @@ const reducerModule = {
     },
 
     draw: (state, Vx, Vy, n) => {
-        var screen = new Uint8Array(state.screen);
-        var memory = state.memory;
-        var I = state.iRegister;
-        var register = new Uint8Array(state.register);
+        const screen = state.screen.slice();
+        const memory = state.memory.slice();
+        const I = state.iRegister;
+        const register = state.register.slice();
 
-        var colision = false;
-        var xBitPos = Vx % (SCREEN_WIDTH * 8);
-        for (i=0; i<n; i++) {
-            var byteToDraw = memory[I + i];
-            var yBitPos = (Vy + i) % SCREEN_HEIGHT;
-            var screenBitPosition = xBitPos + yBitPos * SCREEN_WIDTH;
-            var screenPositionI = screenBitPosition >> 3;
+        let colision = false;
+        let xBitPos = Vx % (SCREEN_WIDTH * 8);
+        for (let i = 0; i < n; i++) {
+            const byteToDraw = memory[I + i];
+            const yBitPos = (Vy + i) % SCREEN_HEIGHT;
+            const screenBitPosition = xBitPos + yBitPos * SCREEN_WIDTH;
+            const screenPositionI = screenBitPosition >> 3;
             // ByteToDraw will be drawn in two parts, a left part and a right part
-            var rightChunkSize = screenBitPosition % 8;
-            var leftMostPart = byteToDraw >> rightChunkSize;
+            const rightChunkSize = screenBitPosition % 8;
+            const leftMostPart = byteToDraw >> rightChunkSize;
 
             if (colision == false && screen[screenPositionI] & leftMostPart) {
                 colision = true;
@@ -483,8 +493,8 @@ const reducerModule = {
             // Just skip this if the sprite is positioned in perfect alignment
             // with memory
             if (rightChunkSize > 0) {
-                var rightMostPart = byteToDraw << (8-rightChunkSize);
-                var wrapCoord = screenPositionI + 1;
+                const rightMostPart = byteToDraw << (8-rightChunkSize);
+                let wrapCoord = screenPositionI + 1;
                 // If this wrapped across the screen, wrapCoord % 8 will be 0,
                 // and we need to subtract 8 to move back to the beginning of the
                 // initial row. The number 8 is screenWidth(64) / pixels per byte (8).
