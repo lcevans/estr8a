@@ -290,6 +290,30 @@ const reducerModule = {
                 return Object.assign({}, reducerModule.draw(state, state.register[x], state.register[y], n), { programCounter: state.programCounter + 0x2 });
             }
 
+            case 0xe: {
+                const x = (instruction & 0x0f00) >> 8;
+                const subOpCode = (instruction & 0x00ff);
+                switch(subOpCode) {
+                    // SKP Vx - Skip the next instruction if the key represented by Vx is down.
+                    case 0x9E: {
+                        let programCounter = state.programCounter + 2;
+                        if (isChipKeyDown(state.register[x])) {
+                            programCounter += 2;
+                        }
+                        return decreaseTimers(state, {programCounter});
+                    }
+                    // SKNP Vx - Skip the next instruction if the key represented by Vx is not down.
+                    case 0xA1: {
+                        let programCounter = state.programCounter + 2;
+                        if (!isChipKeyDown(state.register[x])) {
+                            programCounter += 2;
+                        }
+                        return decreaseTimers(state, {programCounter});
+                    }
+                }
+                throw `Unrecognized instruction ${displayInstruction}`;
+            }
+
             // Misc comands (mostly LD)
             case 0xf: {
                 const x = (instruction & 0x0f00) >> 8;
