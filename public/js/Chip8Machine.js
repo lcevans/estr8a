@@ -50,6 +50,9 @@ class Chip8Machine {
         // Write the loaded game to memory starting at 0x200.
         this.loadDataToOffset(data, 512);
         this.PC = 512;
+        // Clear screen
+        for (let i = 0; i < this.screen.length; i++)
+            this.screen[i] = 0;
     }
 
     loadDataToOffset(data, offset) {
@@ -462,7 +465,7 @@ class Chip8Machine {
                 // Check if we need to wrap col values
                 byteIndex = (byteIndex + 1) % 8 === 0 ? coordsToIndex(0, cY) : byteIndex + 1;
                 // Set the right part of the byte
-                collision |= updateByte((0x01 << (cX % 8)) & spriteByte, byteIndex);
+                collision |= updateByte((spriteByte << 8 - (cX % 8)) & 0xFF, byteIndex);
             } else {
                 collision |= updateByte(spriteByte, byteIndex);
             }
