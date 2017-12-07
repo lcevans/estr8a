@@ -11,7 +11,7 @@ class Chip8Emulator {
         // a game is loaded.
         this.shouldPlay = true;
         // The number of instructions the emulator should attempt to run each second.
-        this.instructionsPerSecond = 60;
+        this.instructionsPerFrame = 10;
 
         // This is dummy code to test that drawing the screen works roughly how we are expecting:
         for (var i = 0; i < 16; i++) {
@@ -66,20 +66,12 @@ class Chip8Emulator {
         if (this.mainLoopId) {
             clearInterval(this.mainLoopId);
         }
-        this.mainLoopId = setInterval(() => this.emulationLoop(), this.getFrameInterval());
+        this.mainLoopId = setInterval(() => this.emulationLoop(), TICK_MS);
 
         if (this.soundLoopId) {
             clearInterval(this.soundLoopId);
         }
         this.soundLoopId = setInterval(() => {tickSound(this.beeper);}, TICK_MS);
-    }
-
-    getInstructionsPerFrame() {
-        return this.shouldPlay ? Math.ceil(this.instructionsPerSecond / 40) : 1;
-    }
-
-    getFrameInterval() {
-        return 1000 / (this.instructionsPerSecond / this.getInstructionsPerFrame());
     }
 
     pauseEmulator() {
@@ -104,9 +96,10 @@ class Chip8Emulator {
     }
 
     emulationLoop() {
-        for (var i = 0; i < this.getInstructionsPerFrame(); i++) {
+        for (var i = 0; i < this.instructionsPerFrame; i++) {
             this.drawFlag = this.machine.tick() || this.drawFlag;
         }
+        this.machine.advanceTimers();
     }
 
     renderLoop() {

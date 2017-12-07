@@ -22,6 +22,10 @@ class InterpreterMachine {
         return instruction >> 12 === 0xD || instruction === 0x00E0; // Hack to force redraw.
     }
 
+    advanceTimers() {
+        this.setState(decreaseTimers(this.state))
+    }
+
     loadGame(data) {
         this.setState(reducerModule.loadProgram(data, this.screenSize));
     }
