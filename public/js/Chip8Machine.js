@@ -69,7 +69,7 @@ class Chip8Machine {
             this.DT--;
         }
 
-        this.executeInst();
+        const inst = this.executeInst();
 
         if (!this.hold) {
             // Advance PC, and take that into account in the couple of instructions that do not need that
@@ -77,12 +77,13 @@ class Chip8Machine {
         } else
             this.hold = false;
 
-        return true;
+        return this.extractPrefix(inst) === 0xD || inst === 0x00E0;
     }
 
     executeInst() {
         let inst = this.memory[this.PC] << 8 | this.memory[this.PC + 1];
         this.lookupTable[this.extractPrefix(inst)](inst); // call the instruction function
+        return inst;
     }
 
     // The maximum is inclusive and the minimum is inclusive
