@@ -19,7 +19,7 @@ class InterpreterMachine {
         // Handle input separately
         this.setState(reducerModule.readInput(this.state));
         this.setState(reducerModule.step(this.state, instruction));
-        return instruction >> 12 === 0xD; // HAck to force redraw.
+        return instruction >> 12 === 0xD || instruction === 0x00E0; // Hack to force redraw.
     }
 
     loadGame(data) {
