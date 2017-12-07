@@ -21,8 +21,7 @@ class Chip8Emulator {
         window.requestAnimationFrame(() => this.renderLoop());
 
         // Set up sound loop
-        var beeper = new Beeper(this.machine);
-        setInterval(() => {tickSound(beeper);}, TICK_MS);
+        this.beeper = new Beeper(this.machine);
     }
 
     loadGame(gameName) {
@@ -68,6 +67,11 @@ class Chip8Emulator {
             clearInterval(this.mainLoopId);
         }
         this.mainLoopId = setInterval(() => this.emulationLoop(), this.getFrameInterval());
+
+        if (this.soundLoopId) {
+            clearInterval(this.soundLoopId);
+        }
+        this.soundLoopId = setInterval(() => {tickSound(this.beeper);}, TICK_MS);
     }
 
     getInstructionsPerFrame() {
@@ -86,6 +90,15 @@ class Chip8Emulator {
             // the emulator is currently playing.
             this.mainLoopId = null;
         }
+
+        if (this.soundLoopId) {
+            clearInterval(this.soundLoopId);
+            // Need to shut off beeper directly
+            this.beeper.stop(TICK_S)
+            this.beeper.playing = false;
+            this.soundLoopId = null;
+        }
+
     }
 
     emulationLoop() {
