@@ -213,7 +213,7 @@ const reducerModule = {
 
                     // SUBN Vx, Vy
                     case 0x7: {
-                        const diff = register[y] - register[x];
+                        let diff = register[y] - register[x];
                         let notBorrow;
                         if (register[y] > register[x]) {
                             notBorrow = 1;
