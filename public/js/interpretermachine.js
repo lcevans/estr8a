@@ -9,8 +9,8 @@ class InterpreterMachine {
 
     setState(state) {
         this.state = state;
-        this.screen = this.state.screen;
-        this.memory = this.state.memory;
+        this.screen = this.state.screen.slice();
+        this.memory = this.state.memory.slice();
     }
 
     tick() {
