@@ -44,6 +44,17 @@ class Chip8Emulator {
             if (this.shouldPlay) {
                 this.startEmulator();
             }
+
+            // Set instructions
+            var instructionsDiv = document.getElementById('instructions');
+            if (gameName in gameInstructions)
+            {
+                instructionsDiv.innerHTML = gameInstructions[gameName];
+            }
+            else
+            {
+                instructionsDiv.innerHTML = "No instructions for this game"
+            }
         });
     }
 
