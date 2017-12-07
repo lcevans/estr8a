@@ -94,8 +94,10 @@ class Chip8Emulator {
         if (this.soundLoopId) {
             clearInterval(this.soundLoopId);
             // Need to shut off beeper directly
-            this.beeper.stop(TICK_S)
-            this.beeper.playing = false;
+            if(this.beeper.playing == true) {
+                this.beeper.stop(TICK_S)
+                this.beeper.playing = false;
+            }
             this.soundLoopId = null;
         }
 

@@ -7,14 +7,14 @@ tickSound = function(beeper) {
     if (beeper.machine.state.stRegister > 0) {
         if (!beeper.playing) {
             beeper.start(TICK_S);
+            beeper.playing = true;
         }
-        beeper.playing = true;
     }
     else {
         if (beeper.playing) {
             beeper.stop(TICK_S);
+            beeper.playing = false;
         }
-        beeper.playing = false;
     }
 }
 
