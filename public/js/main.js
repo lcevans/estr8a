@@ -18,9 +18,6 @@ var main = () => {
     // Setup listeners for the keys that map to the 0-F chip 8 keys.
     initializeKeyboard();
 
-    // Initialize Sound
-    initializeSound();
-
     // Initialize TitleBar
     initializeTitleBar();
 
