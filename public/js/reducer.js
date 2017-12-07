@@ -381,7 +381,7 @@ const reducerModule = {
                     case 0x29: {
                         // NOTE: This assumes the "chip-font" sprites are loaded here in memory
                         return decreaseTimers(state, {
-                            iRegister: 5 * x,
+                            iRegister: 5 * state.register[x],
                             programCounter: state.programCounter + 2,
                         });
                         break;
