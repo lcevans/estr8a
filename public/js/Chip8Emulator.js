@@ -19,6 +19,10 @@ class Chip8Emulator {
         }
         this.drawFlag = true;
         window.requestAnimationFrame(() => this.renderLoop());
+
+        // Set up sound loop
+        var beeper = new Beeper(this.machine);
+        setInterval(() => {tickSound(beeper);}, TICK_MS);
     }
 
     loadGame(gameName) {
