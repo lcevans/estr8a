@@ -1,5 +1,6 @@
 // TODO: Improve the understandability of the mask and shifts.
 // TODO: It's weird to increment the program counter by 2 every time.
+// TODO: Move the codes with subcodes to their own reducers
 
 // Chip font will be loaded into memory at this address.
 const FONT_ADDRESS = 0x0;
@@ -296,19 +297,19 @@ const reducerModule = {
                 switch(subOpCode) {
                     // SKP Vx - Skip the next instruction if the key represented by Vx is down.
                     case 0x9E: {
-                        let programCounter = state.programCounter + 2;
-                        if (isChipKeyDown(state.register[x])) {
-                            programCounter += 2;
-                        }
-                        return decreaseTimers(state, {programCounter});
+                        const key = state.register[x];
+                        const increment = state.keyboard[key] ? 4 : 2;
+                        return decreaseTimers(state, {
+                            programCounter: state.programCounter + increment,
+                        });
                     }
                     // SKNP Vx - Skip the next instruction if the key represented by Vx is not down.
                     case 0xA1: {
-                        let programCounter = state.programCounter + 2;
-                        if (!isChipKeyDown(state.register[x])) {
-                            programCounter += 2;
-                        }
-                        return decreaseTimers(state, {programCounter});
+                        const key = state.register[x];
+                        const increment = !state.keyboard[key] ? 4 : 2;
+                        return decreaseTimers(state, {
+                            programCounter: state.programCounter + increment,
+                        });
                     }
                 }
                 throw `Unrecognized instruction ${displayInstruction}`;
