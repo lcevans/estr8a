@@ -30,7 +30,7 @@ class Chip8Machine {
             0xC: this.RND,
             0xD: this.DRW,
             0xE: this.KBD,
-            0xF: () => undefined,
+            0xF: this.FN,
         };
         // Add the chip font to the beginning of memory.
         for (var i = 0; i < digits.length; i++) {
@@ -422,7 +422,40 @@ class Chip8Machine {
     // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision. //
     //////////////////////////////////////////////////////////////////////////////////////////
     DRW(inst) {
-        var [x, y, n] = this.extractRegs(inst);
+        let [regX, regY, n] = this.extractRegs(inst);
+        let cX = this.V[regX],
+            cY = this.V[regY];
+        let collision = false;
+        this.V[0xF] = 0;
+        // Convert (x,y) to index
+        let coordsToIndex = (x, y) => y * this.screenWidth / 8 + Math.floor(x / 8);
+        // Update the bits of the screen at index and return a flag indicating if any bit
+        // was set from 1 to 0
+        let updateByte = (byte, index) => {
+            let screenByte = this.screen[index];
+            let setBits = screenByte & 0xFF; // Get the bits that currently are set on screen
+            let result = screenByte ^ byte;
+            this.screen[index] = result;
+            return result & setBits !== setBits; // Check if the result has the same bits set
+        };
+        let y2 = cY;
+        for (let i = 0; i < n; i++) {
+            // Check if we need to wrap row values
+            if (y2 + i > this.screenHeight - 1) y2 = 0;
+            let byteIndex = coordsToIndex(x2, y2 + i);
+            let spriteByte = this.memory[this.I + i];
+            if (cX % 8 !== 0) {
+                // Set the left part of the byte
+                collision |= updateByte(spriteByte >> (cX % 8), byteIndex);
+                // Check if we need to wrap col values
+                byteIndex = (byteIndex + 1) % 8 === 0 ? coordsToIndex(0, cY) : byteIndex + 1;
+                // Set the right part of the byte
+                collision |= updateByte((0x01 << (cX % 8)) & spriteByte, byteIndex);
+            } else {
+                collision |= updateByte(spriteByte, byteIndex);
+            }
+        }
+        this.V[0xF] = collision ? 1 : 0;
     }
 
     ///////////////////////////////////////////////////////////////////////
