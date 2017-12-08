@@ -6,8 +6,7 @@ var initializeTitleBar = function () {
         .then(function(data) {
             games = data.data
             select_dom = document.getElementById('games-list');
-            for (i=0; i<games.length; i++)
-            {
+            for (let i = 0; i < games.length; i++) {
                 var opt = document.createElement('option');
                 opt.value = games[i].name;
                 opt.innerHTML = games[i].name;
@@ -35,13 +34,31 @@ var initializeTitleBar = function () {
         emulator.emulationLoop();
     };
 
-
     var speedSelect = document.getElementById('speed-select');
     // Initialize the emulator speed to match the initially selected speed option.
     emulator.instructionsPerFrame = parseInt(speedSelect.options[speedSelect.selectedIndex].value);
     // Update the emulator speed when the user selects a new speed option.
     speedSelect.onchange = function () {
         emulator.instructionsPerFrame = parseInt(speedSelect.options[speedSelect.selectedIndex].value);
+    };
+
+    let machineSelect = document.getElementById('machine-select');
+    // Create an option element for each registered machine
+    Object.keys(machines).forEach(k => {
+        let op = document.createElement('option');
+        op.value = k;
+        op.innerText = k;
+        machineSelect.appendChild(op);
+    });
+    let url = new URL(window.location.href);
+    let selectedMachine = url.searchParams.get('machine') || DEFAULT_MACHINE;
+    // If the provided machine name doesn't exists use the default one
+    if (!machines[selectedMachine])
+        selectedMachine = DEFAULT_MACHINE;
+    machineSelect.value = selectedMachine;
+    machineSelect.onchange = function () {
+        url.searchParams.set('machine', machineSelect.options[machineSelect.selectedIndex].value);
+        window.location.href = url.href;  // Refresh the page pointing to the new machine
     };
 
     updatePlayButtons();

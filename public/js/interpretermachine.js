@@ -37,9 +37,13 @@ class InterpreterMachine {
     getRegisters() {
         return this.state.register;
     }
+
+    getSTRegister() {
+        return this.state.stRegister;
+    }
 }
 
-var makeMachine = function(screenSize) {
+registerMachine('InterpreterMachine', function(screenSize) {
     var machine = new InterpreterMachine(screenSize);
     return machine;
-}
+});
