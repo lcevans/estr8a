@@ -89,6 +89,25 @@ Note: These controls feel like up/down are reversed.<br>
 6 - Push Tile Right<br>
 8 - Push Tile Up<br>
 `,
+    REVRSI : `
+Controls:<br>
+2 - Up<br>
+4 - Left<br>
+6 - Right<br>
+8 - Down<br>
+5 - Place Piece<br>
+`,
+    RUSH_HOUR : `
+Note: to move a piece move the cursor over it, then hold A(Confirm) and then press the direction you want to move. <br>
+Vertical pieces move only up and down, horizontal pieces move only left and right.<br><br>
+Controls:<br>
+1 - Retry/Quit/Cancel<br>
+5 - Up<br>
+7 - Left<br>
+8 - Down<br>
+9 - Right<br>
+A - Confirm
+`,
     SYZYGY : `
 Snake Clone<br>
 <br>
