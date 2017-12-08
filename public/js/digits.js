@@ -9,7 +9,7 @@ var stringToChipFont = (string) => {
     var bytes = new Uint8Array(rows.length);
     for (var row = 0; row < rows.length; row++) {
         value = 0;
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < rows[row].length; i++) {
             value = (value << 1);
             // This will just be undefined if the row doesn't have a full 4 characters, which is fine.
             if (rows[row][i] === '*') {
@@ -17,7 +17,7 @@ var stringToChipFont = (string) => {
             }
         }
         // Chip fonts only use the 4 most significant bits of each byte.
-        bytes[row] = value << 4;
+        bytes[row] = value << (8 - rows[row].length);
     }
     return bytes;
 };
@@ -128,4 +128,97 @@ var digits = [`
 ****
 *
 *
-`].map(stringToChipFont);
+`,
+// Characters  G and beyond aren't part of the original spec,
+// but we have plenty of free memory, and I want to use these
+// for the loading screen.
+`
+ **
+*
+* **
+*  *
+ ***
+`,`
+*  *
+*  *
+****
+*  *
+*  *
+`,`
+****
+ **
+ **
+ **
+****
+`,`
+ ***
+   *
+   *
+*  *
+ **
+`,`
+*  *
+* *
+**
+* *
+*  *
+`,`
+*
+*
+*
+*
+****
+`,
+// Couldn't fit M into 4 wide, but since each font
+// is actually 8 wide in memory, we do have room for this.
+`
+*   *
+** **
+* * *
+*   *
+*   *
+`,`
+*  *
+** *
+****
+* **
+*  *
+`,`
+ **
+*  *
+*  *
+*  *
+ **
+`,`
+***
+*  *
+***
+*
+*
+`,`
+ **
+*  *
+*  *
+ **
+   *
+`,`
+***
+*  *
+***
+*  *
+*  *
+`,`
+ ***
+*
+ **
+   *
+***
+`,`
+****
+ **
+ **
+ **
+ **
+`
+// Not bothering with the rest of the alphabet as we don't currently need it.
+].map(stringToChipFont);

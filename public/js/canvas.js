@@ -64,6 +64,50 @@ var drawEmulatorToCanvas = (emulator) => {
     context.drawImage(canvas, 0, 0, emulator.screenWidth, emulator.screenHeight, 0, 0, canvas.width, canvas.height);
 };
 
+var clearScreen = (emulator) => {
+    for (var y = 0; y < emulator.screenHeight; y++) {
+        for (var x = 0; x < emulator.screenWidth; x++) {
+            context.putImageData(offPixel, x, y);
+        }
+    }
+    context.drawImage(canvas, 0, 0, emulator.screenWidth, emulator.screenHeight, 0, 0, canvas.width, canvas.height);
+}
+
+var drawTitleScreen = (emulator) => {
+    clearScreen(emulator);
+    drawTextToScreen('ESTR8A', 8, 13);
+};
+var drawLoadingScreen = (emulator) => {
+    clearScreen(emulator);
+    drawTextToScreen('LOADING');
+};
+
+var drawTextToScreen = (text, left = 6, top = 13) => {
+    for (var char of text) {
+        // 0-10 are at their corresponding offsets.
+        let digitOffset = parseInt(char);
+        // Letters A-T follow the 10 numbers.
+        if (isNaN(digitOffset)){
+            digitOffset = char.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+        }
+        drawSpriteToCanvas(canvas, digits[digitOffset], left += 6, 13);
+    }
+};
+
+var drawSpriteToCanvas = (canvas, spriteData, left = 0, top = 0) => {
+    var context = canvas.getContext('2d');
+    for (var y = 0; y < spriteData.length; y++) {
+        for (var x = 0; x < 8; x++) {
+            if (spriteData[y] & (1 << (7 - x))) {
+                context.putImageData(onPixel, left * 10 + x, top * 10 + y);
+            } else {
+                context.putImageData(offPixel, left * 10 + x, top * 10 + y);
+            }
+        }
+    }
+    context.drawImage(canvas, left * 10, top * 10, 8, spriteData.length, left * 10, top * 10, 80, spriteData.length * 10);
+};
+
 var addSpriteModal = (spriteData) => {
     removeSpriteModal();
     var canvas = document.createElement("canvas");
@@ -77,16 +121,7 @@ var addSpriteModal = (spriteData) => {
     document.body.append(canvas);
     var context = canvas.getContext('2d');
     context.imageSmoothingEnabled = false;
-    for (var y = 0; y < spriteData.length; y++) {
-        for (var x = 0; x < 8; x++) {
-            if (spriteData[y] & (1 << (7 - x))) {
-                context.putImageData(onPixel, x, y);
-            } else {
-                context.putImageData(offPixel, x, y);
-            }
-        }
-    }
-    context.drawImage(canvas, 0, 0, 8, spriteData.length, 0, 0, canvas.width, canvas.height);
+    drawSpriteToCanvas(canvas, spriteData);
 };
 var removeSpriteModal = () => {
     var oldCanvas = document.getElementById('spriteModal');
