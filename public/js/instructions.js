@@ -2,10 +2,8 @@
 gameInstructions = {
     '15PUZZLE' : `
 Controls:<br>
-2 - Up<br>
-4 - Left<br>
-6 - Right<br>
-8 - Down<br>
+Press the key for the corresponding grid position to slide that tile.<br>
+If the tile is not next to the empty space, other tiles will be moved automatically.
 `,
     BLINKY : `
 Controls:<br>
