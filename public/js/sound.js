@@ -33,8 +33,15 @@ class Beeper {
         this.oscillator = this.audioCtx.createOscillator();
         this.oscillator.type = 'square';
         this.oscillator.frequency.value = SOUND_FREQ;
-        this.oscillator.connect(this.audioCtx.destination);
         this.oscillator.onended = () => this.setup();
+        // create Gain node to reduce volume.
+        this.gainNode = this.audioCtx.createGain();
+        // At least on my machine, this is reasonable volume at 50%
+        // and still quite loud with volume turned up.
+        this.gainNode.gain.value = .005;
+
+        this.oscillator.connect(this.gainNode);
+        this.gainNode.connect(this.audioCtx.destination);
     }
 
     start(delay) {
