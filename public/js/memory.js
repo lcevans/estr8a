@@ -35,8 +35,9 @@ var initializeMemoryDisplay = (machine) => {
     }
     displayedMemory = [...memory];
     highlightedAddress = machine.getProgramCounter();
-    document.getElementsByClassName('js-toggleMemory')[0].onclick = () => {
-        memoryDiv.style.display = (memoryDiv.style.display == 'inline-block') ? 'none' : 'inline-block';
+    document.getElementsByClassName('js-toggleDebug')[0].onclick = () => {
+        var debugDiv = document.getElementById('debugOptions');
+        debugDiv.style.display = (debugDiv.style.display == 'inline-block') ? 'none' : 'inline-block';
     }
 };
 

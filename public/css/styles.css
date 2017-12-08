@@ -130,14 +130,34 @@ body {
 }
 
 /* Memory display */
-.memoryContainer {
+.debugContainer {
+    margin-top: 10px;
     display: inline-block;
     vertical-align: top;
 }
-.memory {
+#debugButtonContainer {
+    width: 100%;
+}
+.js-toggleDebug {
+    font-size: 20px;
+    margin-bottom: 10px;
+    /* border-radius: 5px; */
+    /* border-width: 15px; */
+    /* background-color: #EEEEEE; */
+    /* border: solid; */
+}
+#debugOptions {
     display: none;
+    vertical-align: top;
+    background-color: #EEEEEE;
+    border-color: #333333;
+    border: solid;
+    padding: 5px;
+}
+.memory {
+    /* display: none; */
     height: 400px;
-    margin-right: 20px;
+    margin-right: 10px;
     padding: 5px;
     border: 1px solid black;
     overflow-y: scroll;

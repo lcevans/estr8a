@@ -42,6 +42,7 @@
         Instructions:
       </div>
       <div id="instructions">
+        <!-- The instructions will be overwritten with game instructions on load -->
         - Select and load a game to start playing!<br><br>
         - Use the KEYPAD to control the game<br><br>
         - Keys are mapped to the 4x4 grid of keys:<br><br>
@@ -51,7 +52,6 @@
         A, S, D, F<br>
         Z, X, C, V<br>
         </b>
-        <!-- The instructions will be appended here -->
       </div>
     </div>
   </div>
@@ -62,14 +62,20 @@
         <!-- The keyboard display will be appended here -->
       </div>
     </div>
-    <div class="memoryContainer">
-      <button class="js-toggleMemory">Memory</button>
-      <div id="registers" class="registers">
-        <!-- The registers will be displayed here -->
+    <div class="debugContainer">
+      <div id="debugButtonContainer">
+        <button class="js-toggleDebug">Debug</button>
       </div>
-      <div>
-        <div class="js-memory memory">
-          <!-- The memory display will be appended here -->
+      <div id="debugOptions">
+        REGISTERS
+        <div id="registers" class="registers">
+          <!-- The registers will be displayed here -->
+        </div>
+        MEMORY
+        <div>
+          <div class="js-memory memory">
+            <!-- The memory display will be appended here -->
+          </div>
         </div>
       </div>
     </div>
