@@ -13,11 +13,7 @@ class Chip8Emulator {
         // The number of instructions the emulator should attempt to run each second.
         this.instructionsPerFrame = 10;
 
-        // This is dummy code to test that drawing the screen works roughly how we are expecting:
-        for (var i = 0; i < 16; i++) {
-             this.drawChipCharacterToScreen(digits[i], i % 8, Math.floor(i / 8) * 7);
-        }
-        this.drawFlag = true;
+        this.drawFlag = false;
         window.requestAnimationFrame(() => this.renderLoop());
 
         // Set up sound loop
@@ -40,6 +36,7 @@ class Chip8Emulator {
             return gd;
         }).then(gameData => {
             console.log("Loading", gameData.length, "bytes!");
+            drawLoadingScreen(this);
             this.machine.loadGame(gameData);
             if (this.shouldPlay) {
                 this.startEmulator();
@@ -56,13 +53,6 @@ class Chip8Emulator {
                 instructionsDiv.innerHTML = "No instructions for this game"
             }
         });
-    }
-
-    // x/y are one a werid 8x1 grid to make this simpler.
-    drawChipCharacterToScreen(digit, x, y) {
-        for (var j = 0; j < digit.length; j++) {
-            this.machine.screen[(y + j) * this.screenWidth / 8 + x] = digit[j];
-        }
     }
 
     // Returns whether the emulator is currently running.

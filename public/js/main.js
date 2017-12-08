@@ -13,7 +13,8 @@ var main = () => {
     // This should create a canvas element and whatever methods we need to
     // draw the screen.
     initializeCanvas(emulator.screenWidth, emulator.screenHeight);
-    drawEmulatorToCanvas(emulator);
+    // Draw the title screen.
+    drawTitleScreen(emulator);
     initializeRegisterDisplay(emulator.machine.getRegisters());
     initializeMemoryDisplay(emulator.machine);
 
