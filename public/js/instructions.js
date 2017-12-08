@@ -21,6 +21,14 @@ Controls:<br>
 4 - Left<br>
 6 - Right<br>
 `,
+    CAVE : `
+Controls:<br>
+2 - Up<br>
+4 - Left<br>
+6 - Right<br>
+8 - Down<br>
+F - Start/Restart
+`,
     CONNECT4 : `
 Controls:<br>
 4 - Left<br>
@@ -75,7 +83,11 @@ Controls:<br>
 Turn back now! You have been warned...
 `,
     PUZZLE : `
-????????????
+Note: These controls feel like up/down are reversed.<br>
+2 - Push Tile Down<br>
+4 - Push Tile Left<br>
+6 - Push Tile Right<br>
+8 - Push Tile Up<br>
 `,
     SYZYGY : `
 Snake Clone<br>
