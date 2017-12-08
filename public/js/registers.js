@@ -10,10 +10,6 @@ var toHex = (value, digits) => {
 
 // Render initial state of memory to the screen.
 var initializeRegisterDisplay = (registers) => {
-    while(registersDiv.firstChild) {
-        registersDiv.removeChild(registersDiv.firstChild);
-    }
-
     for (var i = 0; i < registers.length; i++) {
         var register = document.createElement('span');
         register.className = 'register';

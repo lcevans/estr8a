@@ -29,9 +29,6 @@ var initializeMemoryDisplay = (machine) => {
     // TODO: Display registers as well
     var memoryDiv = document.getElementsByClassName('js-memory')[0];
 
-    for (let child of memoryDiv.childNodes)
-        memoryDiv.removeChild(child);
-
     for (var row = 0; row < memory.length / 16; row++) {
         var line = document.createElement('div');
         line.innerHTML = memoryLineToMarkup(memory, row, machine.PC);
