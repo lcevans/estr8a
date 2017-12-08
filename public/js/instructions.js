@@ -108,6 +108,13 @@ Controls:<br>
 9 - Right<br>
 A - Confirm
 `,
+    SQUASH : `
+Solitary Pong<br>
+<br>
+Controls:<br>
+1 - Up<br>
+4 - Down<br>
+`,
     SYZYGY : `
 Snake Clone<br>
 <br>
