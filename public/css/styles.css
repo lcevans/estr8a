@@ -1,24 +1,63 @@
 
 body {
-    background-color: #DDD;
+    background-color: #777777;
+}
+
+.screen {
+    width: 660px;
 }
 
 /* Titlebar display */
-#games-list {
+#upper-bar {
+    width: 100%;
+    background-color: #000000;
+    color: #04BEF2;
+    font-size: 24px;
+    overflow: auto;
+}
+#title-bar {
+    width: 100%;
+    background-color: #000000;
+    color: #04BEF2;
+    font-size: 20px;
+    overflow: auto;
+}
+#games-list, #load-game {
     float: left;
     margin-right: 10px;
 }
-#load-game {
-    float: left;
-    margin-right: 10px;
+#play-button, #pause-button, #step-button {
+    float: right;
+    margin-left: 10px;
 }
-
+#speed-select-span {
+    float: right;
+}
+.btn {
+    background-color: #000000;
+    color: #04BEF2;
+    border-color: #04BEF2;
+    border-width: 2px;
+    font-size: 20px;
+}
+.slct {
+    background-color: #000000;
+    color: #04BEF2;
+    font-size: 20px;
+    border-color: #04BEF2;
+    border-width: 2px;
+}
 
 /* Canvas screen display */
 .canvasContainer {
     display:inline-block;
-    height: 400px;
+    height: 320px;
     vertical-align: top;
+
+    border-style: solid;
+    /* border-radius: 10px; */
+    border-width: 10px;
+    border-color: #444444;
 }
 
 /* Memory display */

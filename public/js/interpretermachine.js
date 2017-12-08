@@ -9,8 +9,8 @@ class InterpreterMachine {
 
     setState(state) {
         this.state = state;
-        this.screen = this.state.screen;
-        this.memory = this.state.memory;
+        this.screen = this.state.screen.slice();
+        this.memory = this.state.memory.slice();
     }
 
     tick() {
@@ -20,6 +20,10 @@ class InterpreterMachine {
         this.setState(reducerModule.readInput(this.state));
         this.setState(reducerModule.step(this.state, instruction));
         return instruction >> 12 === 0xD || instruction === 0x00E0; // Hack to force redraw.
+    }
+
+    advanceTimers() {
+        this.setState(decreaseTimers(this.state))
     }
 
     loadGame(data) {
