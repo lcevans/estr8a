@@ -4,7 +4,7 @@ class Chip8Emulator {
         this.screenHeight = screenHeight;
         // Each pixel only needs 1 bit, so we divide by 8 here to get the length we need.
         let screenSize = (Math.ceil(screenWidth * screenHeight / 8));
-        this.machine = MakeMachine(screenSize);
+        this.machine = MakeMachine(screenSize, screenWidth, screenHeight);
         this.drawFlag = false;
         this.mainLoopId = null;
         // This is named to indicate whether the emulator should play if
@@ -120,8 +120,8 @@ class Chip8Emulator {
         }
         // This will update the display of which keys are being pressed.
         updateKeyboard();
-        updateMemoryDisplay(this.machine, this.machine.state.programCounter);
-        updateRegisterDisplay(this.machine.state.register);
+        updateMemoryDisplay(this.machine, this.machine.getProgramCounter());
+        updateRegisterDisplay(this.machine.getRegisters());
         window.requestAnimationFrame(() => this.renderLoop());
     }
 

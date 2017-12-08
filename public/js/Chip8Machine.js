@@ -1,6 +1,6 @@
 var FONT_MEMORY_OFFSET = 16;
 class Chip8Machine {
-    constructor(screenSize) {
+    constructor(screenSize, screenWidth, screenHeight) {
         this.memory = new Uint8Array(4096); // Main memory
         this.V = new Uint8Array(16); // General purpose registers
         this.I = 0;    // Instruction register
@@ -10,16 +10,49 @@ class Chip8Machine {
         this.DT = 0;   // Delay timer
         this.ST = 0;   // Sound timer
         this.screen = new Uint8Array(screenSize);
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+        this.hold = false;  // Indicate if the machine should advance to the next instruction
+
+        this.lookupTable = {
+            0x0: this.SYS.bind(this),
+            0x1: this.JP1.bind(this),
+            0x2: this.CALL.bind(this),
+            0x3: this.SE3.bind(this),
+            0x4: this.SNE4.bind(this),
+            0x5: this.SE5.bind(this),
+            0x6: this.LD.bind(this),
+            0x7: this.INC.bind(this),
+            0x8: this.ALU.bind(this),
+            0x9: this.SNE.bind(this),
+            0xA: this.LD.bind(this),
+            0xB: this.JPB.bind(this),
+            0xC: this.RND.bind(this),
+            0xD: this.DRW.bind(this),
+            0xE: this.KBD.bind(this),
+            0xF: this.FN.bind(this),
+        };
         // Add the chip font to the beginning of memory.
         for (var i = 0; i < digits.length; i++) {
             this.loadDataToOffset(digits[i], FONT_MEMORY_OFFSET + i * 5);
         }
     }
 
+    getProgramCounter() {
+        return this.PC;
+    }
+
+    getRegisters() {
+        return this.V;
+    }
+
     loadGame(data) {
         // Write the loaded game to memory starting at 0x200.
         this.loadDataToOffset(data, 512);
         this.PC = 512;
+        // Clear screen
+        for (let i = 0; i < this.screen.length; i++)
+            this.screen[i] = 0;
     }
 
     loadDataToOffset(data, offset) {
@@ -39,13 +72,37 @@ class Chip8Machine {
             this.DT--;
         }
 
-        // Alwayd advance PC, and take that into account in the couple of instructions that do not need that
-        this.PC += 2;
+        const inst = this.executeInst();
+
+        if (!this.hold) {
+            // Advance PC, and take that into account in the couple of instructions that do not need that
+            this.PC += 2;
+        } else
+            this.hold = false;
+
+        return this.extractPrefix(inst) === 0xD || inst === 0x00E0;
     }
+
+    executeInst() {
+        let inst = this.memory[this.PC] << 8 | this.memory[this.PC + 1];
+        this.lookupTable[this.extractPrefix(inst)](inst); // call the instruction function
+        return inst;
+    }
+
+    // The maximum is inclusive and the minimum is inclusive
+    getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
 
     ////////////////////////////////////////////////////////////////////////
     /////////////////////////////// ASSEMBLY ///////////////////////////////
     ////////////////////////////////////////////////////////////////////////
+
+    extractPrefix(inst) {
+        return inst >> 12;
+    }
 
     // Extract payload
     extractPayload(inst) {
@@ -64,10 +121,10 @@ class Chip8Machine {
 
     // Extract a register value and a payload byte
     extractReg(inst) {
-        var payload = inst & 0x00FF;
+        let payload = inst & 0x00FF;
         inst = inst >>> 8;
-        var reg = inst & 0x000F;
-        return [reg,payload];
+        let reg = inst & 0x000F;
+        return [reg, payload];
     }
 
     ////////////////////////////////////////////
@@ -79,7 +136,7 @@ class Chip8Machine {
     // Return from a subroutine.              //
     ////////////////////////////////////////////
     SYS(inst) {
-        var [x,y] = this.extractReg(inst);
+        let [x, y] = this.extractReg(inst);
         // Ignore all syscalls other than return and cls
         if (x>0)
             return;
@@ -107,9 +164,20 @@ class Chip8Machine {
     // 1nnn - JP addr        //
     // Jump to location nnn. //
     ///////////////////////////
-    JP(inst) {
-        var addr = this.extractPayload(inst);
-        this.PC = addr-2;
+    JP1(inst) {
+        let addr = this.extractPayload(inst);
+        this.PC = addr;
+        this.hold = true;
+    }
+
+    /////////////////////////
+    // Bnnn - JP V0 + addr
+    // Jump to location nnn + value of V0.
+    ///////////////////////////
+    JPB(inst) {
+        let addr = this.extractPayload(inst);
+        this.PC = this.V[0] + addr;
+        this.hold = true;
     }
 
     /////////////////////////////
@@ -125,7 +193,8 @@ class Chip8Machine {
         this.SP++;
         // Return the the following address
         this.S[this.SP] = this.PC;
-        this.PC = addr-2;
+        this.PC = addr;
+        this.hold = true;
     }
 
 
@@ -136,7 +205,7 @@ class Chip8Machine {
     SE3(inst) {
         var [reg,num] = this.extractReg(inst);
         if (this.V[reg] == num) {
-            this.PC+=2;
+            this.PC += 2;
         }
     }
 
@@ -147,7 +216,7 @@ class Chip8Machine {
     SNE4(inst) {
         var [reg,num] = this.extractReg(inst);
         if (this.V[reg] != num) {
-            this.PC+=2;
+            this.PC += 2;
         }
     }
 
@@ -162,17 +231,29 @@ class Chip8Machine {
             throw "Invalid instruction read!";
         }
         if (this.V[x] == this.V[y]) {
-            this.PC+=2;
+            this.PC += 2;
         }
     }
 
     ////////////////////////
     // 6xkk - LD Vx, byte //
     // Set Vx = kk.       //
+    // Annn - LD I, byte  //
+    // Set I = nnn        //
     ////////////////////////
     LD(inst) {
-        var [reg,num] = this.extractReg(inst);
-        this.V[reg] = num;
+        switch(this.extractPrefix(inst)) {
+            case 0x6: // Store value on V registers
+                let [reg, num] = this.extractReg(inst);
+                this.V[reg] = num;
+                break;
+            case 0xA: // Store value on I register
+                this.I = this.extractPayload(inst);
+                break;
+            default:
+                console.log(this);
+                throw `Invalid instruction read: 0x${this.extractPrefix(inst).toString(16).toUpperCase()}`;
+        }
     }
 
     /////////////////////////
@@ -233,28 +314,28 @@ class Chip8Machine {
             break;
         case 5:
             var diff = this.V[x] - this.V[y];
-            this.V[15] = 1;
+            this.V[0xF] = 1;
             if (diff < 0) {
-                this.V[15] = 0;
+                this.V[0xF] = 0;
                 diff += 2 ** 8;
             }
             this.V[x] = diff;
             break;
         case 6:
-            this.V[15] = this.V[x] & 0x0001;
+            this.V[0xF] = this.V[x] & 0x0001;
             this.V[x] = this.V[x] >>> 1; // TODO: Bug? Shift before assignment?
             break;
         case 7:
             var diff = this.V[y] - this.V[x];
-            this.V[15] = 1;
+            this.V[0xF] = 1;
             if (diff < 0) {
-                this.V[15] = 0;
+                this.V[0xF] = 0;
                 diff += 2 ** 8;
             }
             this.V[x] = diff;
             break;
-        case 14:
-            this.V[15] = this.V[x] >>> 15;
+        case 0xE:
+            this.V[0xF] = this.V[x] >>> 0xF;
             this.V[x] = this.V[x] << 1;
             break;
         default:
@@ -264,39 +345,14 @@ class Chip8Machine {
         }
     }
 
-
     ////////////////////////////////////////
     // 9xy0 - SNE Vx, Vy                  //
     // Skip next instruction if Vx != Vy. //
     ////////////////////////////////////////
-    SNE9(inst) {
-        var [x,y,z] = this.extractRegs(inst);
-        if (z != 0) {
-            console.log(this);
-            throw "Unrecognized instruction!";
-        }
-
-        if (this.V[x] != this.V[y]) {
+    SNE(inst) {
+        let [x, y, num] = this.extractRegs(inst);
+        if (this.V[x] !== this.V[y])
             this.PC += 2;
-        }
-    }
-
-    ///////////////////////
-    // Annn - LD I, addr //
-    // Set I = nnn.      //
-    ///////////////////////
-    LDI(inst) {
-        var num = this.extractPayload(inst);
-        this.I = num;
-    }
-
-    ////////////////////////////////
-    // Bnnn - JP V0, addr         //
-    // Jump to location nnn + V0. //
-    ////////////////////////////////
-    JP(inst) {
-        var num = this.extractPayload(inst);
-        this.PC = this.V[0] + num - 2;
     }
 
     //////////////////////////////////
@@ -304,9 +360,78 @@ class Chip8Machine {
     // Set Vx = random byte AND kk. //
     //////////////////////////////////
     RND(inst) {
-        var [x, num] = this.extractPayload(inst);
-        var rand = Math.random();
-        this.V[x] = num & Math.floor(256*rand);
+        let [reg, num] = this.extractReg(inst);
+        this.V[reg] = this.getRandomInt(0, 255) & num;
+    }
+
+    // Fx07 - LD Vx, DT
+    // Set Vx = delay timer value.
+    // Fx0A - LD Vx, K
+    // Wait for a key press, store the value of the key in Vx.
+    // Fx15 - LD DT, Vx
+    // Set delay timer = Vx.
+    // Fx18 - LD ST, Vx
+    // Set sound timer = Vx.
+    // Fx1E - ADD I, Vx
+    // Set I = I + Vx.
+    // Fx29 - LD F, Vx
+    // Set I = location of sprite for digit Vx.
+    // Fx33 - LD B, Vx
+    // Store BCD representation of Vx in memory locations I, I+1, and I+2.
+    // Fx55 - LD [I], Vx
+    // Store registers V0 through Vx in memory starting at location I.
+    // Fx65 - LD Vx, [I]
+    // Read registers V0 through Vx from memory starting at location I.
+    FN(inst) {
+        let [reg, num] = this.extractReg(inst);
+        switch(num) {
+            case 0x7:
+                this.V[reg] = this.DT;
+                break;
+            case 0xA:
+                // Wait for a key press, store the value of the key in Vx.
+                for (let i = 0; i <= 15; i++)
+                    if (isChipKeyDown(i)) {
+                        this.V[reg] = i;
+                        this.hold = false;
+                        return;
+                    }
+                // Indicate the machine that it must not advance to the next instruction
+                this.hold = true;
+                break;
+            case 0x15:
+                this.DT = this.V[reg];
+                break;
+            case 0x18:
+                this.V[reg] = this.ST;
+                break;
+            case 0x1E:
+                this.I += this.V[reg];
+                break;
+            case 0x29:
+                this.I = FONT_MEMORY_OFFSET + this.V[reg] * 5;
+                break;
+            case 0x33:
+                // Store BCD representation of Vx in memory locations I, I+1, and I+2
+                let val = this.V[reg].toString();
+                for (let i = 0; i < 3; i++) {
+                    this.memory[this.I + i] = val[i];
+                }
+                break;
+            case 0x55:
+                // Store registers V0 through Vx in memory starting at location I
+                for (let i = 0; i <= reg; i++) {
+                    this.memory[this.I] = this.V[i];
+                    this.I += 1;
+                }
+            case 0x65:
+                // Read registers V0 through Vx from memory starting at location I
+                for (let i = 0; i <= reg; i++) {
+                    this.V[i] = this.memory[this.I];
+                    this.I += 1;
+                }
+                break;
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -314,7 +439,41 @@ class Chip8Machine {
     // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision. //
     //////////////////////////////////////////////////////////////////////////////////////////
     DRW(inst) {
-        var [x,y,n] = this.extractRegs(inst);
+        let [regX, regY, n] = this.extractRegs(inst);
+        let cX = this.V[regX],
+            cY = this.V[regY];
+        let collision = false;
+        this.V[0xF] = 0;
+        // Convert (x,y) to index
+        let coordsToIndex = (x, y) => y * this.screenWidth / 8 + Math.floor(x / 8);
+        // Update the bits of the screen at index and return a flag indicating if any bit
+        // was set from 1 to 0
+        let updateByte = (byte, index) => {
+            let screenByte = this.screen[index];
+            let setBits = screenByte & 0xFF; // Get the bits that currently are set on screen
+            let result = screenByte ^ byte;
+            this.screen[index] = result;
+            return (result & setBits) !== setBits; // Check if the result has the same bits set
+        };
+        let y2 = cY;
+        for (let i = 0; i < n; i++) {
+            // Check if we need to wrap row values
+            if (y2 > this.screenHeight - 1) y2 = 0;
+            let byteIndex = coordsToIndex(cX, y2);
+            let spriteByte = this.memory[this.I + i];
+            if (cX % 8 !== 0) {
+                // Set the left part of the byte
+                collision |= updateByte(spriteByte >> (cX % 8), byteIndex);
+                // Check if we need to wrap col values
+                byteIndex = (byteIndex + 1) % 8 === 0 ? coordsToIndex(0, cY) : byteIndex + 1;
+                // Set the right part of the byte
+                collision |= updateByte((spriteByte << 8 - (cX % 8)) & 0xFF, byteIndex);
+            } else {
+                collision |= updateByte(spriteByte, byteIndex);
+            }
+            y2 += 1;
+        }
+        this.V[0xF] = collision ? 1 : 0;
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -324,14 +483,14 @@ class Chip8Machine {
     // Skip next instruction if key with the value of Vx is not pressed. //
     ///////////////////////////////////////////////////////////////////////
     KBD(inst) {
-        var [x,num] = thisextractReg(inst);
+        var [x, num] = this.extractReg(inst);
         if (num == 0x9E) {
-            if (isChipKeyDown(x)) {
+            if (isChipKeyDown(this.V[x])) {
                 this.PC += 2;
             }
         }
         else if (num == 0xA1) {
-            if (! isChipKeyDown(x)) {
+            if (!isChipKeyDown(this.V[x])) {
                 this.PC += 2;
             }
         }
@@ -344,7 +503,7 @@ class Chip8Machine {
 
 }
 
-var makeMachine = function(screenSize) {
-    var machine = new Chip8Machine(screenSize);
+var makeMachine = function(screenSize, screenWidth, screenHeight) {
+    var machine = new Chip8Machine(screenSize, screenWidth, screenHeight);
     return machine;
 }

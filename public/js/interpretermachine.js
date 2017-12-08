@@ -30,6 +30,13 @@ class InterpreterMachine {
         this.setState(reducerModule.loadProgram(data, this.screenSize));
     }
 
+    getProgramCounter() {
+        return this.state.programCounter;
+    }
+
+    getRegisters() {
+        return this.state.register;
+    }
 }
 
 var makeMachine = function(screenSize) {
