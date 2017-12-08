@@ -1,4 +1,4 @@
-var FONT_MEMORY_OFFSET = 16;
+var FONT_MEMORY_OFFSET = 0;
 class Chip8Machine {
     constructor(screenSize, screenWidth, screenHeight) {
         this.memory = new Uint8Array(4096); // Main memory
