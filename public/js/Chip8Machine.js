@@ -142,7 +142,7 @@ class Chip8Machine {
     SYS(inst) {
         let [x, y] = this.extractReg(inst);
         // Ignore all syscalls other than return and cls
-        if (x>0)
+        if (x > 0)
             return;
         // CLS
         if (y == 0xE0) {
@@ -154,10 +154,8 @@ class Chip8Machine {
         else if (y == 0xEE) {
             if (this.SP >= 0) {
                 this.PC = this.S[this.SP];
-                this.S[this.SP] = 0;
                 this.SP--;
-            }
-            else {
+            } else {
                 console.log("Registers:", this);
                 throw "Error! Attempting to return with an empty stack!";
             }
@@ -190,12 +188,12 @@ class Chip8Machine {
     /////////////////////////////
     CALL(inst) {
         var addr = this.extractPayload(inst);
-        if (this.SP >= 15) {
+        if (this.SP >= 0xF) {
             console.log("Registers:", this);
             throw "Stack overflow!";
         }
-        this.SP++;
         // Return the the following address
+        this.SP++;
         this.S[this.SP] = this.PC;
         this.PC = addr;
         this.hold = true;
@@ -208,7 +206,7 @@ class Chip8Machine {
     ///////////////////////////////////////
     SE3(inst) {
         var [reg,num] = this.extractReg(inst);
-        if (this.V[reg] == num) {
+        if (this.V[reg] === num) {
             this.PC += 2;
         }
     }
@@ -219,7 +217,7 @@ class Chip8Machine {
     ////////////////////////////////////////
     SNE4(inst) {
         var [reg,num] = this.extractReg(inst);
-        if (this.V[reg] != num) {
+        if (this.V[reg] !== num) {
             this.PC += 2;
         }
     }
@@ -234,7 +232,7 @@ class Chip8Machine {
             console.log(this);
             throw "Invalid instruction read!";
         }
-        if (this.V[x] == this.V[y]) {
+        if (this.V[x] === this.V[y]) {
             this.PC += 2;
         }
     }
@@ -309,12 +307,8 @@ class Chip8Machine {
             break;
         case 4:
             var sum = this.V[x] + this.V[y];
-            this.V[15] = 0;
-            if (sum >= 2 ** 8) {
-                this.V[15] = 1;
-                sum -= 2 ** 8;
-            }
-            this.V[x] = sum;
+            this.V[x] = sum & 0x00FF;
+            this.V[0xF] = (sum & 0xFF00) >> 8;
             break;
         case 5:
             var diff = this.V[x] - this.V[y];
@@ -326,8 +320,9 @@ class Chip8Machine {
             this.V[x] = diff;
             break;
         case 6:
-            this.V[0xF] = this.V[x] & 0x0001;
-            this.V[x] = this.V[x] >>> 1; // TODO: Bug? Shift before assignment?
+            let lsb = this.V[x] & 0x0001
+            this.V[x] = this.V[x] >> 1; // TODO: Bug? Shift before assignment?
+            this.V[0xF] = lsb;
             break;
         case 7:
             var diff = this.V[y] - this.V[x];
@@ -339,8 +334,9 @@ class Chip8Machine {
             this.V[x] = diff;
             break;
         case 0xE:
-            this.V[0xF] = this.V[x] >>> 0xF;
+            let msb = this.V[x] >>> 0xF
             this.V[x] = this.V[x] << 1;
+            this.V[0xF] = msb;
             break;
         default:
             console.log("Registers:", this);
@@ -394,7 +390,7 @@ class Chip8Machine {
                 break;
             case 0xA:
                 // Wait for a key press, store the value of the key in Vx.
-                for (let i = 0; i <= 15; i++)
+                for (let i = 1; i <= 15; i++)
                     if (isChipKeyDown(i)) {
                         this.V[reg] = i;
                         this.hold = false;
@@ -407,7 +403,7 @@ class Chip8Machine {
                 this.DT = this.V[reg];
                 break;
             case 0x18:
-                this.V[reg] = this.ST;
+                this.ST = this.V[reg];
                 break;
             case 0x1E:
                 this.I += this.V[reg];
@@ -419,20 +415,19 @@ class Chip8Machine {
                 // Store BCD representation of Vx in memory locations I, I+1, and I+2
                 let val = this.V[reg].toString();
                 for (let i = 0; i < 3; i++) {
-                    this.memory[this.I + i] = val[i];
+                    this.memory[this.I + i] = parseInt(val[i]);
                 }
                 break;
             case 0x55:
                 // Store registers V0 through Vx in memory starting at location I
                 for (let i = 0; i <= reg; i++) {
-                    this.memory[this.I] = this.V[i];
-                    this.I += 1;
+                    this.memory[this.I + i] = this.V[i];
                 }
+                break;
             case 0x65:
                 // Read registers V0 through Vx from memory starting at location I
                 for (let i = 0; i <= reg; i++) {
-                    this.V[i] = this.memory[this.I];
-                    this.I += 1;
+                    this.V[i] = this.memory[this.I + i];
                 }
                 break;
         }
