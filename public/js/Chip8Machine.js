@@ -66,16 +66,6 @@ class Chip8Machine {
     }
 
     tick() {
-        // Update timers
-        // Sound currently does nothing since the sound code has its own timer.
-        // It might be worthwhile to move it here
-        if (this.ST > 0) {
-            this.ST--;
-        }
-        if (this.DT > 0) {
-            this.DT--;
-        }
-
         const inst = this.executeInst();
 
         if (!this.hold) {
@@ -85,6 +75,16 @@ class Chip8Machine {
             this.hold = false;
 
         return this.extractPrefix(inst) === 0xD || inst === 0x00E0;
+    }
+
+    advanceTimers() {
+        // Update timers
+        // Sound currently does nothing since the sound code has its own timer.
+        // It might be worthwhile to move it here
+        if (this.ST > 0)
+            this.ST--;
+        if (this.DT > 0)
+            this.DT--;
     }
 
     executeInst() {
