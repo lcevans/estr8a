@@ -42,15 +42,17 @@ var initializeTitleBar = function () {
         emulator.instructionsPerFrame = parseInt(speedSelect.options[speedSelect.selectedIndex].value);
     };
 
-    let url = new URL(window.location.href);
     let machineSelect = document.getElementById('machine-select');
+    // Create an option element for each registered machine
     Object.keys(machines).forEach(k => {
         let op = document.createElement('option');
         op.value = k;
         op.innerText = k;
         machineSelect.appendChild(op);
     });
+    let url = new URL(window.location.href);
     let selectedMachine = url.searchParams.get('machine') || DEFAULT_MACHINE;
+    // If the provided machine name doesn't exists use the default one
     if (!machines[selectedMachine])
         selectedMachine = DEFAULT_MACHINE;
     machineSelect.value = selectedMachine;
