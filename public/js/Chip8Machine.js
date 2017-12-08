@@ -46,6 +46,10 @@ class Chip8Machine {
         return this.V;
     }
 
+    getSTRegister() {
+        return this.ST;
+    }
+
     loadGame(data) {
         // Write the loaded game to memory starting at 0x200.
         this.loadDataToOffset(data, 512);
@@ -500,7 +504,7 @@ class Chip8Machine {
 
 }
 
-var makeMachine = function(screenSize, screenWidth, screenHeight) {
+registerMachine('Chip8Machine', function(screenSize, screenWidth, screenHeight) {
     var machine = new Chip8Machine(screenSize, screenWidth, screenHeight);
     return machine;
-}
+});
