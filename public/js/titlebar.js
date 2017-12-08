@@ -43,7 +43,7 @@ var initializeTitleBar = function () {
     };
 
     let url = new URL(window.location.href);
-    let machineSelect = document.getElementById('version-select');
+    let machineSelect = document.getElementById('machine-select');
     Object.keys(machines).forEach(k => {
         let op = document.createElement('option');
         op.value = k;
