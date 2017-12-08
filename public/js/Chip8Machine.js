@@ -190,9 +190,9 @@ class Chip8Machine {
             console.log("Registers:", this);
             throw "Stack overflow!";
         }
-        this.SP++;
         // Return the the following address
         this.S[this.SP] = this.PC;
+        this.SP++;
         this.PC = addr;
         this.hold = true;
     }
@@ -304,38 +304,35 @@ class Chip8Machine {
             this.V[x] = this.V[x] ^ this.V[y];
             break;
         case 4:
-            var sum = this.V[x] + this.V[y];
-            this.V[15] = 0;
-            if (sum >= 2 ** 8) {
-                this.V[15] = 1;
-                sum -= 2 ** 8;
-            }
-            this.V[x] = sum;
+            let sum = this.V[x] + this.V[y];
+            let carry = sum & 0xFF00 > 0 ? 1 : 0;
+            this.V[x] = sum & 0x00FF;
+            this.V[0xF] = carry;
             break;
         case 5:
-            var diff = this.V[x] - this.V[y];
-            this.V[15] = 1;
+            let diff = this.V[x] - this.V[y];
+            this.V[0xF] = 1;
             if (diff < 0) {
-                this.V[15] = 0;
+                this.V[0xF] = 0;
                 diff += 2 ** 8;
             }
             this.V[x] = diff;
             break;
         case 6:
-            this.V[15] = this.V[x] & 0x0001;
+            this.V[0xF] = this.V[x] & 0x0001;
             this.V[x] = this.V[x] >>> 1; // TODO: Bug? Shift before assignment?
             break;
         case 7:
-            var diff = this.V[y] - this.V[x];
-            this.V[15] = 1;
+            let diff = this.V[y] - this.V[x];
+            this.V[0xF] = 1;
             if (diff < 0) {
-                this.V[15] = 0;
+                this.V[0xF] = 0;
                 diff += 2 ** 8;
             }
             this.V[x] = diff;
             break;
-        case 14:
-            this.V[15] = this.V[x] >>> 15;
+        case 0xE:
+            this.V[0xF] = this.V[x] & (0x1 << 0xF);
             this.V[x] = this.V[x] << 1;
             break;
         default:
