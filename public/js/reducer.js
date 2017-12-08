@@ -477,7 +477,7 @@ const reducerModule = {
         let colision = false;
         let xBitPos = HORIZONTAL_WRAP_AROUND ? Vx % (SCREEN_WIDTH * 8) : Vx;
         if (xBitPos > SCREEN_WIDTH) {
-            return;
+            return Object.assign({}, state);
         }
         for (let i = 0; i < n; i++) {
             const byteToDraw = memory[I + i];
