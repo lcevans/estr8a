@@ -90,9 +90,28 @@ body {
 }
 
 /* Keyboard display */
+#keyboard-div {
+    width: 660px;
+    display: inline-block;
+}
+#keyboard-label {
+    text-align: center;
+    font-size: 20px;
+    /* font-family: monospace; */
+}
 .keyboardContainer {
+    /* Ghetto solution since I couldn't get it to align in the center of the parent div */
+    margin-top: 15px;
+    margin-left: 225px;
+
     display: inline-block;
     vertical-align: top;
+    border-color: #AAAAAA;
+    background-color: #AAAAAA;
+    border-width: 3px;
+    border-style: solid;
+    border-radius: 10px;
+    padding: 5px;
 }
 .keyboardButton {
     display: inline-block;
