@@ -1,5 +1,5 @@
 
-var canvas, context, blackPixel, whitePixel;
+var canvas, context, onPixel, offPixel;
 var initializeCanvas = (width, height) => {
     canvas = document.createElement("canvas");
     canvas.width = width * 10;
@@ -11,16 +11,17 @@ var initializeCanvas = (width, height) => {
 
     // According to https://stackoverflow.com/questions/4899799/whats-the-best-way-to-set-a-single-pixel-in-an-html5-canvas
     // this is the fastest way to set individual pixels on canvases.
-    blackPixel = context.createImageData(1,1);
-    blackPixel.data[0] = 0;
-    blackPixel.data[1] = 0;
-    blackPixel.data[2] = 0;
-    blackPixel.data[3] = 0xFF;
-    whitePixel = context.createImageData(1,1);
-    whitePixel.data[0] = 0xFF;
-    whitePixel.data[1] = 0xFF;
-    whitePixel.data[2] = 0xFF;
-    whitePixel.data[3] = 0xFF;
+    // NOTE: Color of pixels set by RGB
+    onPixel = context.createImageData(1,1);
+    onPixel.data[0] = 0x04;
+    onPixel.data[1] = 0xBE;
+    onPixel.data[2] = 0xF2;
+    onPixel.data[3] = 0xFF;
+    offPixel = context.createImageData(1,1);
+    offPixel.data[0] = 0;
+    offPixel.data[1] = 0;
+    offPixel.data[2] = 0;
+    offPixel.data[3] = 0xFF;
 
     // Periodically look at the text a user has selected in the document, and if it looks like values from
     // the memory display, attempt to display those bytes as a sprite in a modal on the right side of the
@@ -53,9 +54,9 @@ var drawEmulatorToCanvas = (emulator) => {
             var byte = emulator.machine.screen[byteAddress];
             // 1 << 7 gives the left most bit in the byte(128), 1 << 0 will give the right most bit in the byte(1).
             if (byte & (1 << (7 - bitOffset))) {
-                context.putImageData(blackPixel, x, y);
+                context.putImageData(onPixel, x, y);
             } else {
-                context.putImageData(whitePixel, x, y);
+                context.putImageData(offPixel, x, y);
             }
         }
     }
@@ -79,9 +80,9 @@ var addSpriteModal = (spriteData) => {
     for (var y = 0; y < spriteData.length; y++) {
         for (var x = 0; x < 8; x++) {
             if (spriteData[y] & (1 << (7 - x))) {
-                context.putImageData(blackPixel, x, y);
+                context.putImageData(onPixel, x, y);
             } else {
-                context.putImageData(whitePixel, x, y);
+                context.putImageData(offPixel, x, y);
             }
         }
     }

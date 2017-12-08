@@ -3,28 +3,43 @@
     <link rel="stylesheet" type="text/css" href="css/styles.css"/>
 </head>
 <body>
+<div class="screen">
+  <div id="upper-bar">
+    Now Playing:
+    <span id="current-game">No Game Loaded</span>
+  </div>
+  <div class="js-canvasContainer canvasContainer">
+    <!-- The canvas display will be appended here -->
+  </div>
   <div id="title-bar">
-    <select id="games-list">
+    <select id="games-list" class="slct">
       <!-- Populated from call to /api/games -->
     </select>
-    <input id="load-game" type="button" value="Load Game">
-    <button id="play-button">Play</button>
-    <button id="pause-button">Pause</button>
-    <button id="step-button">Step</button>
-    <select id="speed-select">
-        <option value="5000">5000Hz</option>
-        <option value="1000">1000Hz</option>
-        <option value="500">500Hz</option>
-        <option value="100">100Hz</option>
-        <option selected value="60">60Hz</option>
-        <option value="10">10Hz</option>
-        <option value="5">5Hz</option>
-        <option value="1">1Hz</option>
+    <input id="load-game" type="button" class="btn" value="Load Game">
+    <button id="play-button" class="btn">Play</button>
+    <button id="pause-button" class="btn">Pause</button>
+    <button id="step-button" class="btn">Step</button>
+    <span id="speed-select-span">
+    <label for="speed-select">Speed</label>
+    <select id="speed-select" name="speed-select" class="slct">
+      <option value="1000">100x</option>
+      <option value="500">50x</option>
+      <option value="100">10x</option>
+      <option value="50">5x</option>
+      <option value="30">3x</option>
+      <option value="20">2x</option>
+      <option value="15">1.5x</option>
+      <option selected value="10">1x</option>
+      <option value="5">0.5x</option>
+      <option value="1">0.1x</option>
     </select>
     <select id="version-select">
     </select>
-    <div id="current-game">No Game Loaded</div>
   </div>
+</div>
+<div class="js-keyboardContainer keyboardContainer">
+    <!-- The keyboard display will be appended here -->
+</div>
 <div class="memoryContainer">
     <button class="js-toggleMemory">Memory</button>
     <div id="registers" class="registers">
@@ -36,14 +51,15 @@
         </div>
     </div>
 </div>
-<div class="js-canvasContainer canvasContainer">
-    <!-- The canvas display will be appended here -->
-</div>
-<div class="js-keyboardContainer keyboardContainer">
-    <!-- The keyboard display will be appended here -->
+<div class="js-instructions instructionsContainer">
+  INSTRUCTIONS:
+  <div id="instructions">
+    <!-- The instructions will be appended here -->
+  </div>
 </div>
 </body>
 <script src="/js/machines.js"></script>
+<script src="/js/instructions.js"></script>
 <script src="/js/sound.js"></script>
 <script src="/js/titlebar.js"></script>
 <script src="/js/keyboard.js"></script>

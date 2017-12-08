@@ -318,28 +318,28 @@ class Chip8Machine {
             break;
         case 5:
             var diff = this.V[x] - this.V[y];
-            this.V[15] = 1;
+            this.V[0xF] = 1;
             if (diff < 0) {
-                this.V[15] = 0;
+                this.V[0xF] = 0;
                 diff += 2 ** 8;
             }
             this.V[x] = diff;
             break;
         case 6:
-            this.V[15] = this.V[x] & 0x0001;
+            this.V[0xF] = this.V[x] & 0x0001;
             this.V[x] = this.V[x] >>> 1; // TODO: Bug? Shift before assignment?
             break;
         case 7:
             var diff = this.V[y] - this.V[x];
-            this.V[15] = 1;
+            this.V[0xF] = 1;
             if (diff < 0) {
-                this.V[15] = 0;
+                this.V[0xF] = 0;
                 diff += 2 ** 8;
             }
             this.V[x] = diff;
             break;
-        case 14:
-            this.V[15] = this.V[x] >>> 15;
+        case 0xE:
+            this.V[0xF] = this.V[x] >>> 0xF;
             this.V[x] = this.V[x] << 1;
             break;
         default:
@@ -398,9 +398,11 @@ class Chip8Machine {
                     if (isChipKeyDown(i)) {
                         this.V[reg] = i;
                         this.hold = false;
+                        return;
                     }
                 // Indicate the machine that it must not advance to the next instruction
                 this.hold = true;
+                break;
             case 0x15:
                 this.DT = this.V[reg];
                 break;
@@ -455,13 +457,13 @@ class Chip8Machine {
             let setBits = screenByte & 0xFF; // Get the bits that currently are set on screen
             let result = screenByte ^ byte;
             this.screen[index] = result;
-            return result & setBits !== setBits; // Check if the result has the same bits set
+            return (result & setBits) !== setBits; // Check if the result has the same bits set
         };
         let y2 = cY;
         for (let i = 0; i < n; i++) {
             // Check if we need to wrap row values
-            if (y2 + i > this.screenHeight - 1) y2 = 0;
-            let byteIndex = coordsToIndex(cX, y2 + i);
+            if (y2 > this.screenHeight - 1) y2 = 0;
+            let byteIndex = coordsToIndex(cX, y2);
             let spriteByte = this.memory[this.I + i];
             if (cX % 8 !== 0) {
                 // Set the left part of the byte
@@ -473,6 +475,7 @@ class Chip8Machine {
             } else {
                 collision |= updateByte(spriteByte, byteIndex);
             }
+            y2 += 1;
         }
         this.V[0xF] = collision ? 1 : 0;
     }

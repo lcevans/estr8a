@@ -2,6 +2,8 @@
 // Some chip8 versions use different screen sizes, so I'm setting these as constants.
 var SCREEN_WIDTH = 64;
 var SCREEN_HEIGHT = 32;
+var HORIZONTAL_WRAP_AROUND = true;
+var VERTICAL_WRAP_AROUND = false;
 
 const DEFAULT_MACHINE = Object.keys(machines)[0];
 // Try to get a machine from the URL
