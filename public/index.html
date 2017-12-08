@@ -3,59 +3,66 @@
     <link rel="stylesheet" type="text/css" href="css/styles.css"/>
 </head>
 <body>
-<div class="screen">
-  <div id="upper-bar">
-    Now Playing:
-    <span id="current-game">No Game Loaded</span>
+  <div id="upper-half">
+    <div class="screen">
+      <div id="upper-bar">
+        Now Playing:
+        <span id="current-game">No Game Loaded</span>
+      </div>
+      <div class="js-canvasContainer canvasContainer">
+        <!-- The canvas display will be appended here -->
+      </div>
+      <div id="title-bar">
+        <select id="games-list" class="slct">
+          <!-- Populated from call to /api/games -->
+        </select>
+        <input id="load-game" type="button" class="btn" value="Load Game">
+        <button id="play-button" class="btn">Play</button>
+        <button id="pause-button" class="btn">Pause</button>
+        <button id="step-button" class="btn">Step</button>
+        <span id="speed-select-span">
+          <label for="speed-select">Speed</label>
+          <select id="speed-select" name="speed-select" class="slct">
+            <option value="1000">100x</option>
+            <option value="500">50x</option>
+            <option value="100">10x</option>
+            <option value="50">5x</option>
+            <option value="30">3x</option>
+            <option value="20">2x</option>
+            <option value="15">1.5x</option>
+            <option selected value="10">1x</option>
+            <option value="5">0.5x</option>
+            <option value="1">0.1x</option>
+          </select>
+        </span>
+      </div>
+    </div>
+    <div class="js-instructions instructionsContainer">
+      <div id="instructions-title">
+        Instructions:
+      </div>
+      <div id="instructions">
+        Select and load a game to start playing!
+        <!-- The instructions will be appended here -->
+      </div>
+    </div>
   </div>
-  <div class="js-canvasContainer canvasContainer">
-    <!-- The canvas display will be appended here -->
-  </div>
-  <div id="title-bar">
-    <select id="games-list" class="slct">
-      <!-- Populated from call to /api/games -->
-    </select>
-    <input id="load-game" type="button" class="btn" value="Load Game">
-    <button id="play-button" class="btn">Play</button>
-    <button id="pause-button" class="btn">Pause</button>
-    <button id="step-button" class="btn">Step</button>
-    <span id="speed-select-span">
-    <label for="speed-select">Speed</label>
-    <select id="speed-select" name="speed-select" class="slct">
-      <option value="1000">100x</option>
-      <option value="500">50x</option>
-      <option value="100">10x</option>
-      <option value="50">5x</option>
-      <option value="30">3x</option>
-      <option value="20">2x</option>
-      <option value="15">1.5x</option>
-      <option selected value="10">1x</option>
-      <option value="5">0.5x</option>
-      <option value="1">0.1x</option>
-    </select>
-    </span>
-  </div>
-</div>
-<div class="js-keyboardContainer keyboardContainer">
-    <!-- The keyboard display will be appended here -->
-</div>
-<div class="memoryContainer">
-    <button class="js-toggleMemory">Memory</button>
-    <div id="registers" class="registers">
+  <div id="bottom-half">
+    <div class="js-keyboardContainer keyboardContainer">
+      <!-- The keyboard display will be appended here -->
+    </div>
+    <div class="memoryContainer">
+      <button class="js-toggleMemory">Memory</button>
+      <div id="registers" class="registers">
         <!-- The registers will be displayed here -->
-    </div>
-    <div>
+      </div>
+      <div>
         <div class="js-memory memory">
-            <!-- The memory display will be appended here -->
+          <!-- The memory display will be appended here -->
         </div>
+      </div>
     </div>
-</div>
-<div class="js-instructions instructionsContainer">
-  INSTRUCTIONS:
-  <div id="instructions">
-    <!-- The instructions will be appended here -->
   </div>
-</div>
 </body>
 <script src="/js/instructions.js"></script>
 <script src="/js/titlebar.js"></script>
