@@ -8,7 +8,7 @@ A Chip 8 emulator
 
 Screenshot/Gameplay
 
-![Tetris](https://github.com/lcevans/estr8a/raw/master/misc/tetris.png)
+![Tetris](https://raw.githubusercontent.com/lcevans/estr8da/master/misc/tetris.png)
 
 To run:
 - `npm install`
