@@ -1,4 +1,4 @@
-# estr8a
+# estr8da
 
 A Chip 8 emulator
 
