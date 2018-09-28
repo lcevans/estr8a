@@ -13,3 +13,4 @@ Screenshot/Gameplay
 To run:
 - `npm install`
 - `node server`
+- In browser, open `http://127.0.0.1:3000`
