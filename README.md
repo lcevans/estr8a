@@ -1,6 +1,6 @@
 # estr8a
 
-A [Chip 8](https://en.wikipedia.org/wiki/CHIP-8) emulator developed during Winter Hackweek 2017 at AdRoll.\
+A [Chip 8](https://en.wikipedia.org/wiki/CHIP-8) emulator developed during Winter Hackweek 2017 at [AdRoll](http://tech.adroll.com/).\
 Participants/contibutors at https://github.com/lcevans/estr8a/graphs/contributors
 
 ![estr8a](https://familyguyaddicts.files.wordpress.com/2017/02/image292.jpg?w=230&h=300)
