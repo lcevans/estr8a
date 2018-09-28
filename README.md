@@ -1,6 +1,6 @@
 # estr8a
 
-A Chip 8 emulator
+A Chip 8 emulator developed during Winter Hackweek 2017 at AdRoll
 
 ![estr8a](https://familyguyaddicts.files.wordpress.com/2017/02/image292.jpg?w=230&h=300)
 
